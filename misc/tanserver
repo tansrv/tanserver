@@ -1,0 +1,71 @@
+#! /bin/bash
+
+# Copyright (C) tanserver.org
+# Copyright (C) Chen Daye
+
+### BEGIN INIT INFO
+# Provides:          tanserver
+# Required-Start:    $all
+# Required-Stop:	 $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: control script
+# Description:       control script
+### END INIT INFO
+
+NAME=tanserver
+PIDFILE=/var/run/tanserver.pid
+DAEMON=/usr/local/tanserver/sbin/tanserver
+
+PID=$(head -n +1 $PIDFILE 2>/dev/null)
+
+start() {
+	kill -0 $PID 2>/dev/null || $DAEMON
+}
+
+stop() {
+	kill -SIGTERM $PID 2>/dev/null
+}
+
+reload() {
+	cd /usr/local/$NAME/build/ && cmake . >/dev/null && make && make install >/dev/null && \
+	kill -SIGUSR2 $PID 2>/dev/null
+}
+
+status() {
+	$DAEMON -a
+}
+
+configtest() {
+	$DAEMON -t
+}
+
+version() {
+	$DAEMON -v
+}
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+reload)
+	reload
+	;;
+status)
+	status
+	;;
+configtest)
+	configtest
+	;;
+version)
+	version
+	;;
+*)
+	echo "Usage: /etc/init.d/$NAME {start|stop|reload|status|configtest|version}"
+	exit 1
+esac
+
+exit 0
