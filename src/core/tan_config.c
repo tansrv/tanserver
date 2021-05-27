@@ -37,9 +37,8 @@ static tan_int_t tan_load_log(cfg_t *cfg);
 static tan_int_t tan_load_log_shipper(cfg_t *cfg);
 static tan_int_t tan_validate_hostname(const char *name);
 static tan_int_t tan_load_allowlist_to_vec(cfg_t *cfg);
+static tan_int_t tan_verify_hostaddr(const char *hostaddr);
 static void tan_cfg_error_print(const char *str);
-static tan_int_t tan_load_string_list_to_vec(cfg_t *cfg, const char *sec,
-                                             tan_vector_string_t *vec);
 
 
 static struct {
@@ -355,30 +354,22 @@ tan_validate_hostname(const char *name)
 static tan_int_t
 tan_load_allowlist_to_vec(cfg_t *cfg)
 {
-    return tan_load_string_list_to_vec(cfg, "allowlist",
-                                       &config.log.shipper.allowlist);
-}
+    char      *str, *p;
+    unsigned   count, k;
+    tan_int_t  ret;
 
-
-static void
-tan_cfg_error_print(const char *str)
-{
-    tan_stderr_error(0, "invalid configuration file: %s", str);
-}
-
-
-static tan_int_t
-tan_load_string_list_to_vec(cfg_t *cfg, const char *sec,
-                            tan_vector_string_t *vec)
-{
-    char     *str, *p;
-    unsigned  count, k;
-
-    count = cfg_size(cfg, sec);
+    count = cfg_size(cfg, "allowlist");
 
     for (k = 0; k < count; ++k) {
 
-        str = cfg_getnstr(cfg, sec, k);
+        str = cfg_getnstr(cfg, "allowlist", k);
+
+        ret = tan_verify_hostaddr(str);
+        if (ret != TAN_OK) {
+
+            tan_cfg_error_print("allowlist: invalid ip address");
+            return ret;
+        }
 
         p = (char *)calloc(1, strlen(str) + 1);
         if (p == NULL) {
@@ -388,10 +379,31 @@ tan_load_string_list_to_vec(cfg_t *cfg, const char *sec,
         }
 
         strcpy(p, str);
-        tan_vector_push_back(*vec, char *, p);
+
+        tan_vector_push_back(config.log.shipper.allowlist,
+                             char *, p);
     }
 
     return TAN_OK;
+}
+
+
+static tan_int_t
+tan_verify_hostaddr(const char *hostaddr)
+{
+    struct in_addr  addr;
+
+    if (inet_aton(hostaddr, &addr))
+        return TAN_OK;
+
+    return TAN_ERROR;
+}
+
+
+static void
+tan_cfg_error_print(const char *str)
+{
+    tan_stderr_error(0, "invalid configuration file: %s", str);
 }
 
 
