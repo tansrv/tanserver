@@ -28,12 +28,20 @@ tan_signal_init()
     int               k;
     struct sigaction  sa;
 
-    sa.sa_flags     = SA_RESTART | SA_SIGINFO;
-    sa.sa_sigaction = tan_signal_handler;
-
-    sigemptyset(&sa.sa_mask);
-
     for (k = 0; linux_signals[k]; ++k) {
+
+        tan_memzero(&sa, sizeof(sa));
+
+        if (linux_signals[k] == SIGPIPE ||
+            linux_signals[k] == SIGABRT)
+        {
+            sa.sa_handler = SIG_IGN;
+        } else {
+            sa.sa_flags     = SA_RESTART | SA_SIGINFO;
+            sa.sa_sigaction = tan_signal_handler;
+        }
+
+        sigemptyset(&sa.sa_mask);
 
         if (sigaction(linux_signals[k], &sa, NULL)) {
 
