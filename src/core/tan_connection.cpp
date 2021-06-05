@@ -134,6 +134,8 @@ tan_free_client_connection(tan_connection_t *conn)
     SSL_shutdown(conn->info.ssl);
     tan_ssl_close(&conn->info.ssl, &conn->info.fd);
 
+    conn->event.header.clear();
+
     conn->event.read           = NULL;
     conn->event.json_read      = 0;
 

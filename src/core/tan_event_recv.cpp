@@ -7,17 +7,25 @@
 
 
 #include "tan_core.h"
-#include "tan_epoll.h"
 #include "tan_events.h"
 #include "tan_jsoncpp.h"
 #include "tan_user_api.h"
 
 
-#define TAN_HEADER_SIZE  200
+#define TAN_MAX_PACKET_HEADER_SIZE  1024
 
 
-static tan_ssl_t tan_recv_header(tan_connection_t *conn, char *header);
-static tan_int_t tan_header_parse(tan_connection_t *conn, const char *header);
+typedef enum {
+    TAN_RECV_HEADER_FAILED = 0,
+    TAN_RECV_HEADER_CONTINUE,
+    TAN_RECV_HEADER_DONE,
+} tan_header_status_e;
+
+
+static int tan_recv_header(tan_connection_t *conn);
+static tan_ssl_t tan_recv_header_byte_by_byte(tan_connection_t *conn, char *buf);
+static int tan_check_crlf(const char *buf);
+static tan_int_t tan_header_parse(tan_connection_t *conn);
 static void tan_event_recv_json(tan_connection_t *conn);
 static tan_ssl_t tan_recv_json(tan_connection_t *conn);
 static tan_int_t tan_packet_handler(tan_connection_t *conn);
@@ -36,27 +44,23 @@ static const char  *client_errors[] = {
 
 
 void
-tan_event_protocol_v0(tan_connection_t *conn)
+tan_event_recv_header(tan_connection_t *conn)
 {
-    char       header[TAN_HEADER_SIZE + 1];
-    tan_ssl_t  ret;
+    int  ret;
 
-    tan_memzero(header, TAN_HEADER_SIZE + 1);
-
-    ret = tan_recv_header(conn, header);
+    ret = tan_recv_header(conn);
 
     switch (ret) {
 
-    case TAN_SSL_READ_OK:
+    case TAN_RECV_HEADER_CONTINUE:
+
+        return;
+
+    case TAN_RECV_HEADER_DONE:
 
         break;
 
-    case TAN_SSL_CONTINUE:
-
-        conn->event.read = tan_event_protocol_v0;
-        return;
-
-    default:
+    case TAN_RECV_HEADER_FAILED:
 
         goto out_disconnect;
     }
@@ -64,7 +68,7 @@ tan_event_protocol_v0(tan_connection_t *conn)
     if (tan_unlikely(conn->status.closing & 1))
         goto out_disconnect;
 
-    if (tan_header_parse(conn, header) != TAN_OK)
+    if (tan_header_parse(conn) != TAN_OK)
         goto out_disconnect;
 
     conn->event.json_string.reset(new
@@ -80,20 +84,74 @@ out_disconnect:
 }
 
 
+static int
+tan_recv_header(tan_connection_t *conn)
+{
+    char       buf[2];
+    tan_ssl_t  ret;
+
+    tan_memzero(buf, 2);
+
+    for (;;) {
+
+        ret = tan_recv_header_byte_by_byte(conn, buf);
+
+        switch (ret) {
+
+        case TAN_SSL_READ_OK:
+
+            break;
+
+        case TAN_SSL_CONTINUE:
+
+            conn->event.read = tan_event_recv_header;
+            return TAN_RECV_HEADER_CONTINUE;
+
+        default:
+
+            return TAN_RECV_HEADER_FAILED;
+        }
+
+        conn->event.header.append(buf);
+
+        if (conn->event.header.length() > TAN_MAX_PACKET_HEADER_SIZE)
+            return TAN_RECV_HEADER_FAILED;
+
+        if (!tan_check_crlf(conn->event.header.c_str()))
+            return TAN_RECV_HEADER_DONE;
+    }
+}
+
+
 static tan_ssl_t
-tan_recv_header(tan_connection_t *conn, char *header)
+tan_recv_header_byte_by_byte(tan_connection_t *conn, char *buf)
 {
     int  bytes_read;
 
     bytes_read = 0;
 
     return tan_ssl_read(&bytes_read, conn->info.ssl,
-                        header, TAN_HEADER_SIZE);
+                        buf, 1);
+}
+
+
+static int
+tan_check_crlf(const char *buf)
+{
+    int  k;
+
+    for (k = 0; buf[k]; ++k) {
+
+        if (buf[k] == '\r' && buf[k + 1] == '\n')
+            return 0;
+    }
+
+    return -1;
 }
 
 
 static tan_int_t
-tan_header_parse(tan_connection_t *conn, const char *header)
+tan_header_parse(tan_connection_t *conn)
 {
     Json::Value    value;
     const u_char  *p;
@@ -101,7 +159,7 @@ tan_header_parse(tan_connection_t *conn, const char *header)
     p = tan_get_hostaddr(&conn->info.addr);
 
     try {
-        value = json_decode(header);
+        value = json_decode(conn->event.header);
     } catch (...) {
 
         tan_log_info(client_errors[0],
@@ -162,7 +220,7 @@ tan_event_recv_json(tan_connection_t *conn)
     if (tan_packet_handler(conn) != TAN_OK)
         goto out_disconnect;
 
-    conn->event.read     = tan_event_protocol_v0;
+    conn->event.read     = tan_event_recv_header;
     conn->status.closing = 1;
 
     return;
@@ -233,16 +291,7 @@ tan_packet_handler(tan_connection_t *conn)
 static void
 tan_make_packet(std::string &json_string)
 {
-    char  buf[101];
-
-    buf[100] = '\0';
-    memset(buf, ' ', 100);
-
-    *(buf + snprintf(buf, 101,
-                     "{\"json_length\":%u}",
-                     (unsigned)json_string.length())) = ' ';
-
-    json_string.insert(0, buf);
+    json_string.append("\r\n");
 }
 
 

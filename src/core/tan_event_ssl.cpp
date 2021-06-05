@@ -19,5 +19,5 @@ tan_event_ssl_handshake(tan_connection_t *conn)
         return;
     }
 
-    tan_event_get_protocol(conn);
+    tan_event_recv_header(conn);
 }

@@ -131,7 +131,7 @@ tan_try_ssl_handshake(tan_connection_t *client)
 
     case TAN_SSL_ACCEPT_OK:
 
-        client->event.read = tan_event_get_protocol;
+        client->event.read = tan_event_recv_header;
         return TAN_OK;
 
     default:

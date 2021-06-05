@@ -37,6 +37,8 @@ typedef struct {
 
     void                   (*read)(tan_connection_t *conn);
 
+    std::string              header;
+
     std::string              user_api;
     int                      json_length;
 
