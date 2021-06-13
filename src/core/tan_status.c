@@ -84,7 +84,7 @@ tan_get_handled_requests()
 void
 tan_active_connections_atomic_inc()
 {
-    if (tan_is_running() == -1)
+    if (tan_unlikely(tan_is_stop()))
         return;
 
     tan_atomic_inc(((tan_status_t *)status)->active_connections);
@@ -94,7 +94,7 @@ tan_active_connections_atomic_inc()
 void
 tan_active_connections_atomic_dec()
 {
-    if (tan_is_running() == -1)
+    if (tan_unlikely(tan_is_stop()))
         return;
 
     tan_atomic_dec(((tan_status_t *)status)->active_connections);
@@ -104,7 +104,7 @@ tan_active_connections_atomic_dec()
 void
 tan_handled_requests_atomic_inc()
 {
-    if (tan_is_running() == -1)
+    if (tan_unlikely(tan_is_stop()))
         return;
 
     tan_atomic_inc(((tan_status_t *)status)->handled_requests);
