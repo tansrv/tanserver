@@ -22,15 +22,15 @@ static tan_list_node_t  timers;
 
 
 void
-tan_timer_init()
+tan_event_timer_init()
 {
     tan_list_init(&timers);
 }
 
 
 tan_int_t
-tan_add_timer(void (*handler)(void *data, unsigned u32),
-              void *data, unsigned u32, time_t sec)
+tan_event_add_timer(void (*handler)(void *data, unsigned u32),
+                    void *data, unsigned u32, time_t sec)
 {
     tan_timer_t  *timer;
 
@@ -52,7 +52,7 @@ tan_add_timer(void (*handler)(void *data, unsigned u32),
 
 
 void
-tan_expire_timers()
+tan_event_expire_timers()
 {
     tan_timer_t      *timer;
     tan_list_node_t  *tmp;

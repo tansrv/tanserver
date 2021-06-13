@@ -73,9 +73,9 @@ tan_client_connection_init(tan_connection_t *conn,
         if (ret != TAN_OK)
             goto failed;
 
-        ret = tan_add_timer(tan_check_request_timeout,
-                            client, client->status.seed,
-                            tan_get_server_cfg()->request_timeout);
+        ret = tan_event_add_timer(tan_check_request_timeout,
+                                  client, client->status.seed,
+                                  tan_get_server_cfg()->request_timeout);
 
         if (ret == TAN_OK)
             return ret;

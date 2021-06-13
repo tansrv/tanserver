@@ -24,7 +24,7 @@
 #include "tan_process_loop.h"
 #include "tan_syscfg.h"
 #include "tan_time.h"
-#include "tan_timer.h"
+#include "tan_event_timer.h"
 #include "tan_socket.h"
 #include "tan_openssl_ssl.h"
 #include "tan_file.h"

@@ -158,7 +158,7 @@ tan_worker_process_init()
 {
     tan_int_t  ret;
 
-    tan_timer_init();
+    tan_event_timer_init();
 
     tan_time_update();
 

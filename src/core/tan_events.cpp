@@ -27,8 +27,8 @@ tan_event_loop(tan_socket_t server)
 
     tan_close_socket(server);
 
-    if (tan_add_timer(tan_set_worker_exit, NULL, 0,
-                      tan_get_server_cfg()->request_timeout)
+    if (tan_event_add_timer(tan_set_worker_exit, NULL, 0,
+                            tan_get_server_cfg()->request_timeout)
         != TAN_OK)
     {
         return;
@@ -52,7 +52,7 @@ tan_process_events_and_timers()
         tan_reload_end();
     }
 
-    tan_expire_timers();
+    tan_event_expire_timers();
 
     tan_epoll_process_events();
 }
