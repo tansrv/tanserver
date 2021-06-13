@@ -10,7 +10,7 @@
 #define TANSERVER_H
 
 
-#define TANSERVER_VERSION  "1.0.4"
+#define TANSERVER_VERSION  "1.0.5"
 #define TANSERVER_DOCS     "tanserver.org"
 
 
