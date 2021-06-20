@@ -23,6 +23,22 @@
 #define TAN_VECTOR_H
 
 
+/*
+ * example:
+ *
+ * tan_vector_t(numbers, int);
+ *
+ * tan_vector_numbers_t  numbers;
+ * tan_vector_init(numbers);
+ *
+ * tan_vector_push_back(numbers, int, 20);
+ * tan_vector_push_back(numbers, int, 30);
+ *
+ * for (int k = 0; k < numbers.size; ++k)
+ *     printf("%d\n", numbers.vec[k]);
+ */
+
+
 #define tan_vector_t(name, type)                                                \
     typedef struct {                                                            \
         type   *vec;                                                            \
@@ -33,12 +49,12 @@
     (name).size = (name).m = 0, (name).vec = NULL
 
 #define tan_vector_push_back(name, type, data)                                  \
-    do {				                                                        \
-        if ((name).size == (name).m) {						     	            \
-	        (name).m = (name).m ? (name).m<<1 : 2;						        \
+    do {                                                                        \
+        if ((name).size == (name).m) {                                          \
+	        (name).m = (name).m ? (name).m<<1 : 2;                              \
 	        (name).vec = (type *)realloc((name).vec, sizeof(type) * (name).m);  \
-        }															            \
-        (name).vec[(name).size++] = data;				                        \
+        }                                                                       \
+        (name).vec[(name).size++] = data;                                       \
     } while (0)
 
 
