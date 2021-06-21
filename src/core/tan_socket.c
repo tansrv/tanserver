@@ -80,6 +80,7 @@ tan_socket_disable_nagle(tan_socket_t fd)
 }
 
 
+/* Avoid thundering herd.  */
 static tan_int_t
 tan_socket_allow_reuseport(tan_socket_t fd)
 {
