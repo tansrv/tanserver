@@ -59,9 +59,17 @@ tan_master_process_loop()
 
     for (;;) {
 
+        /*
+         * Master process is waiting for a signal:
+         *
+         * SIGUSR2: Notify all worker processes to reload APIs.
+         * SIGCHLD: Re-fork child process.
+         * SIGTERM: Notify all child processes to exit.
+         */
         if (sigwait(&sigset, &signo))
             tan_log_warn(errno, "sigwait() failed", NULL);
 
+        /* Update the date string, which will be used to write the log.  */
         tan_time_update();
 
         switch (signo) {
