@@ -31,6 +31,7 @@ tan_fd_t tan_get_access_log();
 void tan_log(int err, int level, int insert_lf,
              const char *func, const char *str, ...);
 void tan_stderr_error(int err, const char *str, ...);
+/* without "tanserver:"  */
 void tan_stderr_info(const char *str, ...);
 
 

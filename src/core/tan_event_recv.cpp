@@ -52,6 +52,12 @@ static const char  *client_errors[] = {
 };
 
 
+/*
+ * example:
+ *
+ * header: {"user_api":"hello_world","json_length":17}\r\n
+ * body: {"hello":"world"}
+ */
 void
 tan_event_recv_header(tan_connection_t *conn)
 {
