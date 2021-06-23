@@ -22,6 +22,15 @@ typedef enum {
 } tan_header_status_e;
 
 
+typedef enum {
+    TAN_ERR_INVALID_PACKET_HEADER = 0,
+    TAN_ERR_INVALID_USER_API,
+    TAN_ERR_INVALID_JSON_LENGTH,
+    TAN_ERR_FUNCTION_NOT_FOUND,
+    TAN_ERR_INVALID_JSON_STRING,
+} tan_error_num_e;
+
+
 static int tan_recv_header(tan_connection_t *conn);
 static tan_ssl_t tan_recv_header_byte_by_byte(tan_connection_t *conn, char *buf);
 static int tan_check_crlf(const char *buf);
@@ -162,7 +171,7 @@ tan_header_parse(tan_connection_t *conn)
         value = json_decode(conn->event.header);
     } catch (...) {
 
-        tan_log_info(client_errors[0],
+        tan_log_info(client_errors[TAN_ERR_INVALID_PACKET_HEADER],
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -171,7 +180,7 @@ tan_header_parse(tan_connection_t *conn)
     conn->event.user_api = value["user_api"].asString();
     if (conn->event.user_api.empty()) {
 
-        tan_log_info(client_errors[1],
+        tan_log_info(client_errors[TAN_ERR_INVALID_USER_API],
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -182,7 +191,7 @@ tan_header_parse(tan_connection_t *conn)
     if (conn->event.json_length > tan_get_server_cfg()->client_max_json_size ||
         conn->event.json_length <= 0)
     {
-        tan_log_info(client_errors[2],
+        tan_log_info(client_errors[TAN_ERR_INVALID_JSON_LENGTH],
                      conn->event.json_length,
                      tan_get_server_cfg()->client_max_json_size,
                      p[0], p[1], p[2], p[3]);
@@ -255,7 +264,7 @@ tan_packet_handler(tan_connection_t *conn)
     api = tan_get_user_api_handler(func);
     if (api == NULL) {
 
-        tan_log_info(client_errors[3],
+        tan_log_info(client_errors[TAN_ERR_FUNCTION_NOT_FOUND],
                      func,
                      p[0], p[1], p[2], p[3]);
 
@@ -266,7 +275,7 @@ tan_packet_handler(tan_connection_t *conn)
         value = json_decode(conn->event.json_string.get());
     } catch (...) {
 
-        tan_log_info(client_errors[4],
+        tan_log_info(client_errors[TAN_ERR_INVALID_JSON_STRING],
                      func,
                      p[0], p[1], p[2], p[3]);
 
