@@ -48,6 +48,19 @@ static tan_int_t tan_ssl_read1(SSL *ssl, void *buf, int num);
 static tan_int_t tan_ssl_write1(SSL *ssl, void *buf, int num);
 
 
+/*
+ * 1. Server: Send the number of log files and hostname to the client.
+ * 2. Client: Create a directory (hostname).
+ * 3. Server: Send the information (file name + size) of
+ *            each log file to the client.
+ * 4. Client: Receive log file information one by one and push it
+ *            into a container according to the file name and size.
+ * 5. Client: Send the number of files that should be received
+ *            and the information (file name + size) of each file to the server.
+ * 6. Server: Receive the information of each file one by one
+ *            according to the number of files, send the size that the
+ *            client should receive, open the file and send it.
+ */
 void
 tan_shipper_process_loop()
 {
