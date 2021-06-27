@@ -10,11 +10,11 @@
 
 # Tanserver
 
-Tanserver is a lightweight server framework.
+Tanserver is a server framework built for APIs.
 
 It receives JSON string from the client and returns JSON string after querying the database.
 
-Works with most Android / iOS / desktop applications.
+You can apply Tanserver to your `Android` / `iOS` / `macOS` / `watchOS` / `desktop` apps.
 
 ## Documentation
 
@@ -34,7 +34,9 @@ Works with most Android / iOS / desktop applications.
 
 1. [Java](https://github.com/tansrv/tanserver-connector-java)
 
-Currently only support `Java` client, and will soon support: `Swift`, `Dart`, and `C++`.
+2. [Swift](https://github.com/tansrv/tanserver-connector-swift)
+
+Currently `Java` and `Swift` clients are supported. (`Dart` / `C++` will be supported in the future.)
 
 ## Example
 
