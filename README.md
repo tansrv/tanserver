@@ -14,13 +14,12 @@ Tanserver is a server framework built for APIs.
 
 It receives JSON string from the client and returns JSON string after querying the database.
 
-You can apply Tanserver to your `Android` / `iOS` / `macOS` / `watchOS` / `desktop` apps.
+You can apply Tanserver to your `Android` / `iOS` / `desktop` apps.
 
 ## Documentation
 
-* [Install Tanserver](https://www.tanserver.org/#/install)
+* [Install Tanserver](https://tanserver.org/en/install/)
 * [Tanserver documentation](https://www.tanserver.org)
-* [中文文档](https://www.tanserver.org/#/zh/)
 
 ## Features
 
