@@ -26,6 +26,7 @@
 #include "tan_time.h"
 #include "tan_event_timer.h"
 #include "tan_socket.h"
+#include "tan_openssl_crypto.h"
 #include "tan_openssl_ssl.h"
 #include "tan_file.h"
 #include "tan_log.h"
