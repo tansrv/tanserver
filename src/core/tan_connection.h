@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -11,6 +9,7 @@
 
 
 #include "tan_core.h"
+#include "tan_openssl_ssl.h"
 
 #include <string>
 #include <memory>

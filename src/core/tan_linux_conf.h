@@ -18,6 +18,7 @@
 
 
 #include <dirent.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
