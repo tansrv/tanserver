@@ -150,7 +150,7 @@ tan_header_parse(tan_connection_t *conn)
         value = json_decode(conn->event.header);
     } catch (...) {
 
-        tan_log_info(TAN_INVALID_PACKET_HEADER,
+        tan_log_info(TAN_INVALID_REQUEST_HEADER,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;

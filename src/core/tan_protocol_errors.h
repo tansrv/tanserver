@@ -8,8 +8,11 @@
 #define TAN_PROTOCOL_ERRORS_H
 
 
-#define TAN_INVALID_PACKET_HEADER                   \
-    "invalid packet header received, client: %d.%d.%d.%d"
+#define TAN_REQUEST_HEADER_TOO_LARGE                \
+    "request header too large, client: %d.%d.%d.%d"
+
+#define TAN_INVALID_REQUEST_HEADER                  \
+    "invalid request header received, client: %d.%d.%d.%d"
 
 #define TAN_INVALID_USER_API                        \
     "invalid \"user_api\" received, client: %d.%d.%d.%d"
