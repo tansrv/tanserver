@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -15,10 +13,18 @@
 
 
 void tan_event_loop(tan_socket_t server);
+
 void tan_event_accept(tan_connection_t *conn);
 void tan_event_ssl_handshake(tan_connection_t *conn);
-void tan_event_recv_header(tan_connection_t *conn);
+
+void tan_event_select_protocol(tan_connection_t *conn);
+void tan_event_custom_protocol(tan_connection_t *conn);
+void tan_event_websocket(tan_connection_t *conn);
+
 void tan_event_write(tan_connection_t *conn);
+
+/* This function will be removed soon.  */
+void tan_event_recv_header(tan_connection_t *conn);
 
 
 #endif /* TAN_EVENTS_H */
