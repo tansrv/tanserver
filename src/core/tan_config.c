@@ -1,14 +1,13 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
 
 #include <confuse.h>
+#include <openssl/ssl.h>
 
 
 #define TAN_DEFAULT_LISTEN_PORT           2579

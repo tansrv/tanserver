@@ -1,12 +1,11 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
+#include "tan_openssl_ssl.h"
 
 
 static void tan_write_openssl_error_to_stderr();
@@ -139,6 +138,47 @@ tan_ssl_read(int *bytes_read, SSL *ssl, void *buf, int num)
             ++*bytes_read; /* may return TAN_SSL_CONTINUE  */
 
         return tan_ssl_get_error(ssl, ret);
+    }
+}
+
+
+tan_ssl_t
+tan_ssl_readline(SSL *ssl, std::string &line)
+{
+    char       buf[2];
+    int        len, bytes_read;
+    tan_ssl_t  ret;
+
+    buf[1]     = '\0';
+    len        = line.length();
+    bytes_read = 0;
+
+    for (;;) {
+
+        ret = tan_ssl_read(&bytes_read, ssl, buf, 1);
+
+        switch (ret) {
+
+        case TAN_SSL_READ_OK:
+
+            break;
+
+        case TAN_SSL_CONTINUE:
+
+            return TAN_SSL_READLINE_CONTINUE;
+
+        default:
+
+            return TAN_SSL_READLINE_FAILED;
+        }
+
+        line.append(buf);
+
+        if (++len > TAN_MAX_STR_SIZE)
+            return TAN_SSL_READLINE_TOO_LARGE;
+
+        if (buf[0] == '\n')
+            return TAN_SSL_READLINE_DONE;
     }
 }
 
