@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -62,7 +60,7 @@ tan_single_connection_init(tan_connection_t *conn)
 
     conn->event.read           = NULL;
     conn->event.write          = tan_event_write;
-    conn->event.json_read      = 0;
+    conn->event.content_read   = 0;
 
     conn->status.seed          = rand();
     conn->status.closing       = 0;
@@ -137,7 +135,7 @@ tan_free_client_connection(tan_connection_t *conn)
     conn->event.header.clear();
 
     conn->event.read           = NULL;
-    conn->event.json_read      = 0;
+    conn->event.content_read   = 0;
 
     conn->status.seed          = rand_r(&conn->status.seed);
     conn->status.closing       = 0;

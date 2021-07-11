@@ -25,26 +25,39 @@ typedef struct {
     struct sockaddr_in       addr;
     socklen_t                addrlen;
 
-    char                     protocol;
+    /* 0: custom protocol / 1: websocket  */
+    unsigned                 protocol : 1;
 
     struct timeval           start;
 } tan_conn_info_t;
 
 
 typedef struct {
+    /* Event flags.  */
     unsigned                 events;
 
+    /* Readable event callback.  */
     void                   (*read)(tan_connection_t *conn);
+
+    /* Related to websocket, used to decode data. 4 Bytes.  */
+    char                     mask[5];
 
     std::string              header;
 
     std::string              user_api;
-    int                      json_length;
 
-    std::unique_ptr<char[]>  json_string;
-    int                      json_read;
+    /* The length of the content to be received.  */
+    int                      content_length;
 
+    std::unique_ptr<char[]>  content;
+
+    /* The length of the content received.  */
+    int                      content_read;
+
+    /* Writable event callback.  */
     void                   (*write)(tan_connection_t *conn);
+
+    /* The packet to be sent to the client.  */
     std::string              packet;
 } tan_conn_event_t;
 

@@ -64,8 +64,14 @@ tan_select_protocol(tan_connection_t *conn)
 
     header = conn->event.header.c_str();
 
-    if (header[0] == 'G' && header[1] == 'E' && header[2] == 'T')
+    if (header[0] == 'G' && header[1] == 'E' && header[2] == 'T') {
+
+        conn->info.protocol = 1;
         tan_event_websocket(conn);
-    else
+
+    } else {
+
+        conn->info.protocol = 0;
         tan_event_custom_protocol(conn);
+    }
 }

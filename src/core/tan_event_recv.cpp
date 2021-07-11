@@ -59,8 +59,8 @@ tan_event_recv_header(tan_connection_t *conn)
     if (tan_header_parse(conn) != TAN_OK)
         goto out_disconnect;
 
-    conn->event.json_string.reset(new
-        char[conn->event.json_length + 1]());
+    conn->event.content.reset(new
+        char[conn->event.content_length + 1]());
 
     tan_event_recv_json(conn);
 
@@ -165,13 +165,13 @@ tan_header_parse(tan_connection_t *conn)
         return TAN_ERROR;
     }
 
-    conn->event.json_length = value["json_length"].asInt();
+    conn->event.content_length = value["json_length"].asInt();
 
-    if (conn->event.json_length > tan_get_server_cfg()->client_max_json_size ||
-        conn->event.json_length <= 0)
+    if (conn->event.content_length > tan_get_server_cfg()->client_max_json_size ||
+        conn->event.content_length <= 0)
     {
         tan_log_info(TAN_INVALID_JSON_LENGTH,
-                     conn->event.json_length,
+                     conn->event.content_length,
                      tan_get_server_cfg()->client_max_json_size,
                      p[0], p[1], p[2], p[3]);
 
@@ -222,9 +222,9 @@ out_disconnect:
 static tan_ssl_t 
 tan_recv_json(tan_connection_t *conn)
 {
-    return tan_ssl_read(&conn->event.json_read, conn->info.ssl,
-                        conn->event.json_string.get(),
-                        conn->event.json_length);
+    return tan_ssl_read(&conn->event.content_read, conn->info.ssl,
+                        conn->event.content.get(),
+                        conn->event.content_length);
 }
 
 
@@ -251,7 +251,7 @@ tan_packet_handler(tan_connection_t *conn)
     }
 
     try {
-        value = json_decode(conn->event.json_string.get());
+        value = json_decode(conn->event.content.get());
     } catch (...) {
 
         tan_log_info(TAN_INVALID_JSON_STRING,
