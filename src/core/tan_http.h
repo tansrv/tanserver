@@ -8,7 +8,7 @@ extern "C" {
 
 
 #include "tan_core.h"
-
+#include <regex> 
 
 char *tan_http_header_get_value(const char *header,
                                 const char *key);
