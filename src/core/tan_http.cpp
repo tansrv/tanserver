@@ -22,7 +22,7 @@ tan_http_header_get_value(const char *header,
     std::regex rgx (rgxStr);
 
     if(std::regex_search(header, matches, rgx))
-        return matches[1].first; // index 1 to get first group
+        return matches[1].str(); // index 1 to get first group
 
     throw "error";
 }
