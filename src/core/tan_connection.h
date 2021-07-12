@@ -72,7 +72,7 @@ typedef struct {
 
 
 typedef struct {
-    unsigned                 flags
+    unsigned                 flags;
     unsigned                 seed;
     unsigned                 instance : 1;
 } tan_conn_status_t;
