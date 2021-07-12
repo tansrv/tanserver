@@ -15,14 +15,15 @@ std::string
 tan_http_header_get_value(const char *header,
                           const char *field)
 {
-    std::string rgxStr (": (.+)\r\n");
-    rgxStr = std::string(field) + rgxStr;
+    std::cmatch  matches;
+    std::string  rgx_str(": (.+)\r\n");
 
-    std::cmatch matches;
-    std::regex rgx (rgxStr);
+    rgx_str = std::string(field) + rgx_str;
 
-    if(std::regex_search(header, matches, rgx))
-        return matches[1].str(); // index 1 to get first group
+    std::regex  rgx(rgx_str);
 
-    throw "error";
+    if (std::regex_search(header, matches, rgx))
+        return matches[1].str();  /* Index 1 to get first group.  */
+
+    throw "Field not found.";
 }
