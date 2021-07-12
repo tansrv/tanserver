@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -95,9 +93,9 @@ tan_epoll_process_events()
 
         instance = (uintptr_t)ptr & 1;
 
-        conn = (tan_connection_t *)((uintptr_t)ptr &~ 1);
+        conn = (tan_connection_t *)((uintptr_t)ptr & ~1);
 
-        /* The way to deal with stale events is the same as Nginx  */
+        /* The way to deal with stale events is the same as Nginx.  */
         if (conn->info.fd == -1 ||
             conn->status.instance != instance)
         {
