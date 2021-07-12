@@ -54,6 +54,7 @@ static tan_int_t tan_custom_protocol_header_parse(tan_connection_t *conn,
                                                   int *header_index);
 static tan_int_t tan_custom_protocol_body_parse(tan_connection_t *conn,
                                                 const char *body);
+static void tan_send_packet(tan_connection_t *conn);
 
 
 void
@@ -471,7 +472,7 @@ tan_get_custom_protocol_header(char *buf,
                                const std::string &content,
                                int *header_index)
 {
-    *header_index = s1.find("\r\n");
+    *header_index = content.find("\r\n");
     if (*header_index >= TAN_MAX_STR_SIZE) {
         // log
         return TAN_ERROR;
