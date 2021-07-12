@@ -130,7 +130,9 @@ tan_try_ssl_handshake(tan_connection_t *client)
 
     case TAN_SSL_CONTINUE:
 
-        client->event.read = tan_event_ssl_handshake;
+        client->event.read    = tan_event_ssl_handshake;
+        client->status.flags |= TAN_CONN_STATUS_SSL_HANDSHAKING;
+
         return TAN_OK;
 
     /* unlikely  */

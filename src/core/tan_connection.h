@@ -16,9 +16,10 @@
 
 
 /* Some connection status flags, more will be added in future versions.  */
-#define TAN_CONN_STATUS_WRITE_PENDING   1
-#define TAN_CONN_STATUS_WS_HANDSHAKING  2
-#define TAN_CONN_STATUS_CLOSING         4
+#define TAN_CONN_STATUS_SSL_HANDSHAKING  (1 << 0)
+#define TAN_CONN_STATUS_WS_HANDSHAKING   (1 << 1)
+#define TAN_CONN_STATUS_WRITE_PENDING    (1 << 2)
+#define TAN_CONN_STATUS_CLOSING          (1 << 3)
 
 
 typedef struct tan_connection_s  tan_connection_t;
