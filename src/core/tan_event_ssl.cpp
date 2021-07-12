@@ -18,7 +18,7 @@ tan_event_ssl_handshake(tan_connection_t *conn)
     }
 
     /* Handshake succeeded.  */
-    client->status.flags &= ~TAN_CONN_STATUS_SSL_HANDSHAKING;
+    conn->status.flags &= ~TAN_CONN_STATUS_SSL_HANDSHAKING;
 
     tan_event_select_protocol(conn);
 }
