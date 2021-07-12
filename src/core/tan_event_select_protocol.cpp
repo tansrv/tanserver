@@ -44,7 +44,7 @@ tan_event_select_protocol(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    if (tan_unlikely(conn->status.closing & 1))
+    if (tan_unlikely(conn->status.flags & TAN_CONN_STATUS_CLOSING))
         goto out_disconnect;
 
     tan_select_protocol(conn);

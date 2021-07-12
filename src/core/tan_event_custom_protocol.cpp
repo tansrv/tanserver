@@ -108,8 +108,8 @@ tan_event_recv_json(tan_connection_t *conn)
     if (tan_packet_handler(conn) != TAN_OK)
         goto out_disconnect;
 
-    conn->event.read     = tan_event_select_protocol;
-    conn->status.closing = 1;
+    conn->event.read    = tan_event_select_protocol;
+    conn->status.flags |= TAN_CONN_STATUS_CLOSING;
 
     return;
 
@@ -202,6 +202,6 @@ tan_send_packet(tan_connection_t *conn)
 
     case TAN_SSL_CONTINUE:
 
-        conn->status.write_pending = 1;
+        conn->status.flags |= TAN_CONN_STATUS_WRITE_PENDING;
     }
 }

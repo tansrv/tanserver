@@ -15,6 +15,12 @@
 #include <memory>
 
 
+/* Some connection status flags, more will be added in future versions.  */
+#define TAN_CONN_STATUS_WRITE_PENDING   1
+#define TAN_CONN_STATUS_WS_HANDSHAKING  2
+#define TAN_CONN_STATUS_CLOSING         4
+
+
 typedef struct tan_connection_s  tan_connection_t;
 
 
@@ -33,7 +39,7 @@ typedef struct {
 
 
 typedef struct {
-    /* Event flags.  */
+    /* Epoll event flags.  */
     unsigned                 events;
 
     /* Readable event callback.  */
@@ -59,13 +65,15 @@ typedef struct {
 
     /* The packet to be sent to the client.  */
     std::string              packet;
+
+    /* Used for websocket handshake.  */
+    std::string              ws_response_header;
 } tan_conn_event_t;
 
 
 typedef struct {
+    unsigned                 flags
     unsigned                 seed;
-    unsigned                 write_pending : 1;
-    unsigned                 closing : 1;
     unsigned                 instance : 1;
 } tan_conn_status_t;
 

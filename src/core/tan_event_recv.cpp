@@ -53,7 +53,7 @@ tan_event_recv_header(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    if (tan_unlikely(conn->status.closing & 1))
+    if (tan_unlikely(conn->status.flags & TAN_CONN_STATUS_CLOSING))
         goto out_disconnect;
 
     if (tan_header_parse(conn) != TAN_OK)
@@ -208,8 +208,8 @@ tan_event_recv_json(tan_connection_t *conn)
     if (tan_packet_handler(conn) != TAN_OK)
         goto out_disconnect;
 
-    conn->event.read     = tan_event_recv_header;
-    conn->status.closing = 1;
+    conn->event.read    = tan_event_recv_header;
+    conn->status.flags |= TAN_CONN_STATUS_CLOSING;
 
     return;
 
@@ -302,6 +302,6 @@ tan_send_packet(tan_connection_t *conn)
 
     case TAN_SSL_CONTINUE:
 
-        conn->status.write_pending = 1;
+        conn->status.flags |= TAN_CONN_STATUS_WRITE_PENDING;
     }
 }

@@ -54,18 +54,17 @@ tan_idle_connections_init()
 static void
 tan_single_connection_init(tan_connection_t *conn)
 {
-    conn->info.ssl             = NULL;
-    conn->info.fd              = -1;
-    conn->info.addrlen         = sizeof(struct sockaddr_in);
+    conn->info.ssl           = NULL;
+    conn->info.fd            = -1;
+    conn->info.addrlen       = sizeof(struct sockaddr_in);
 
-    conn->event.read           = NULL;
-    conn->event.write          = tan_event_write;
-    conn->event.content_read   = 0;
+    conn->event.read         = NULL;
+    conn->event.write        = tan_event_write;
+    conn->event.content_read = 0;
 
-    conn->status.seed          = rand();
-    conn->status.closing       = 0;
-    conn->status.instance      = 0;
-    conn->status.write_pending = 0;
+    conn->status.flags       = 0;
+    conn->status.seed        = rand();
+    conn->status.instance    = 0;
 }
 
 
@@ -134,13 +133,12 @@ tan_free_client_connection(tan_connection_t *conn)
 
     conn->event.header.clear();
 
-    conn->event.read           = NULL;
-    conn->event.content_read   = 0;
+    conn->event.read         = NULL;
+    conn->event.content_read = 0;
 
-    conn->status.seed          = rand_r(&conn->status.seed);
-    conn->status.closing       = 0;
-    conn->status.instance     =~ conn->status.instance;
-    conn->status.write_pending = 0;
+    conn->status.flags       = 0;
+    conn->status.seed        = rand_r(&conn->status.seed);
+    conn->status.instance    =~ conn->status.instance;
 
     tan_list_push_back(&idle_connections, &conn->node);
 
