@@ -37,7 +37,7 @@ typedef enum {
 
 static int tan_ws_recv_header(tan_connection_t *conn);
 static tan_int_t tan_ws_handshake(tan_connection_t *conn);
-static void tan_ws_make_response_header(const char *buf,
+static void tan_ws_make_response_header(char *buf,
                                         const char *sec_ws_accept);
 
 
@@ -114,7 +114,7 @@ tan_ws_handshake(tan_connection_t *conn)
     std::string  key;
 
     try {
-        key = tan_http_header_get_value(conn->event.header,
+        key = tan_http_header_get_value(conn->event.header.c_str(),
                                         "Sec-WebSocket-Key");
     } catch (...) {
         return TAN_ERROR;
@@ -142,7 +142,7 @@ tan_ws_handshake(tan_connection_t *conn)
 
 
 static void
-tan_ws_make_response_header(const char *buf,
+tan_ws_make_response_header(char *buf,
                             const char *sec_ws_accept)
 {
     snprintf(buf, TAN_MAX_STR_SIZE,
