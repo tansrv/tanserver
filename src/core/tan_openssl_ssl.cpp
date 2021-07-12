@@ -161,6 +161,7 @@ tan_ssl_readline(SSL *ssl, std::string &line)
 
         case TAN_SSL_READ_OK:
 
+            bytes_read = 0;
             break;
 
         case TAN_SSL_CONTINUE:
