@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -138,7 +136,7 @@ tan_try_ssl_handshake(tan_connection_t *client)
     /* unlikely  */
     case TAN_SSL_ACCEPT_OK:
 
-        client->event.read = tan_event_recv_header;
+        client->event.read = tan_event_select_protocol;
         return TAN_OK;
 
     default:

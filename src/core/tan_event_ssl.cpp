@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -19,5 +17,5 @@ tan_event_ssl_handshake(tan_connection_t *conn)
         return;
     }
 
-    tan_event_recv_header(conn);
+    tan_event_select_protocol(conn);
 }
