@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -32,7 +30,7 @@ typedef int  tan_int_t;
 
 typedef struct {
     in_port_t            port;
-    int                  client_max_json_size;
+    int                  client_max_body_size;
     int                  request_timeout;
 } tan_server_cfg_t;
 

@@ -36,7 +36,7 @@ tan_event_select_protocol(tan_connection_t *conn)
 
         p = tan_get_hostaddr(&conn->info.addr);
 
-        tan_log_info(TAN_REQUEST_HEADER_TOO_LARGE,
+        tan_log_info(TAN_PROTOCOL_COMMON_ERROR_REQUEST_HEADER_TOO_LARGE,
                      p[0], p[1], p[2], p[3]);
 
     case TAN_SSL_READLINE_FAILED:

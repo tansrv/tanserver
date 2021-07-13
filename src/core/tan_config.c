@@ -7,11 +7,10 @@
 #include "tan_core.h"
 
 #include <confuse.h>
-#include <openssl/ssl.h>
 
 
 #define TAN_DEFAULT_LISTEN_PORT           2579
-#define TAN_DEFAULT_CLIENT_MAX_JSON_SIZE  SSL3_RT_MAX_PLAIN_LENGTH
+#define TAN_DEFAULT_CLIENT_MAX_BODY_SIZE  16384
 #define TAN_DEFAULT_REQUEST_TIMEOUT       60
 
 #define TAN_DEFAULT_PGSQL_HOSTADDR        "127.0.0.1"
@@ -57,7 +56,7 @@ tan_cfg_init()
 
     cfg_opt_t  server[] = {
         CFG_INT("listen", TAN_DEFAULT_LISTEN_PORT, CFGF_NONE),
-        CFG_INT("client_max_json_size", TAN_DEFAULT_CLIENT_MAX_JSON_SIZE, CFGF_NONE),
+        CFG_INT("client_max_body_size", TAN_DEFAULT_CLIENT_MAX_BODY_SIZE, CFGF_NONE),
         CFG_INT("request_timeout", TAN_DEFAULT_REQUEST_TIMEOUT, CFGF_NONE),
         CFG_END()
     };
@@ -156,9 +155,9 @@ tan_load_server(cfg_t *cfg)
 
     config.server.port = (in_port_t)cfg_getint(sec, "listen");
 
-    config.server.client_max_json_size = cfg_getint(sec, "client_max_json_size");
-    if (config.server.client_max_json_size <= 0)
-        config.server.client_max_json_size = TAN_DEFAULT_CLIENT_MAX_JSON_SIZE;
+    config.server.client_max_body_size = cfg_getint(sec, "client_max_body_size");
+    if (config.server.client_max_body_size <= 0)
+        config.server.client_max_body_size = TAN_DEFAULT_CLIENT_MAX_BODY_SIZE;
 
     config.server.request_timeout = cfg_getint(sec, "request_timeout");
     if (config.server.request_timeout <= 0)

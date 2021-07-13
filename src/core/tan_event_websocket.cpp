@@ -135,7 +135,10 @@ tan_ws_handshake(tan_connection_t *conn)
         key = tan_http_header_get_value(conn->event.header.c_str(),
                                         "Sec-WebSocket-Key");
     } catch (...) {
-        // log
+
+        tan_log_info(TAN_WEBSOCKET_ERROR_SEC_WEBSOCKET_KEY_NOT_FOUND,
+                     p[0], p[1], p[2], p[3]);
+
         return TAN_ERROR;
     }
 
@@ -198,8 +201,7 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    // log
-    if (tan_unlikely(buf[0] != 0x81))
+    if (buf[0] != 0x81)
         goto out_disconnect;
 
     len = TAN_WS_GET_PAYLOAD_LEN_7(buf[1]);
@@ -338,7 +340,16 @@ tan_event_ws_recv_mask(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    // check length here
+    if (conn->event.content_length >
+        tan_get_server_cfg()->client_max_body_size)
+    {
+        tan_log_info(TAN_WEBSOCKET_ERROR_PAYLOAD_LENGTH_TOO_LARGE,
+                     conn->event.content_length,
+                     tan_get_server_cfg()->client_max_body_size,
+                     p[0], p[1], p[2], p[3]);
+
+        goto out_disconnect;
+    }
 
     conn->event.content.reset(new
         char[conn->event.content_length + 1]());
@@ -448,7 +459,7 @@ tan_custom_protocol_header_parse(tan_connection_t *conn,
         value = json_decode(header);
     } catch (...) {
 
-        tan_log_info(TAN_INVALID_REQUEST_HEADER,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_REQUEST_HEADER,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -457,7 +468,7 @@ tan_custom_protocol_header_parse(tan_connection_t *conn,
     conn->event.user_api = value["user_api"].asString();
     if (conn->event.user_api.empty()) {
 
-        tan_log_info(TAN_INVALID_USER_API,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_USER_API_NOT_FOUND,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -474,7 +485,10 @@ tan_get_custom_protocol_header(char *buf,
 {
     *header_index = content.find("\r\n");
     if (*header_index >= TAN_MAX_STR_SIZE) {
-        // log
+
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_REQUEST_HEADER_TOO_LARGE,
+                     p[0], p[1], p[2], p[3]);
+
         return TAN_ERROR;
     }
 
@@ -500,7 +514,7 @@ tan_custom_protocol_body_parse(tan_connection_t *conn,
     api = tan_get_user_api_handler(func);
     if (api == NULL) {
 
-        tan_log_info(TAN_FUNCTION_NOT_FOUND,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
                      func,
                      p[0], p[1], p[2], p[3]);
 
@@ -511,7 +525,7 @@ tan_custom_protocol_body_parse(tan_connection_t *conn,
         value = json_decode(body);
     } catch (...) {
 
-        tan_log_info(TAN_INVALID_JSON_STRING,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_JSON_STRING,
                      func,
                      p[0], p[1], p[2], p[3]);
 

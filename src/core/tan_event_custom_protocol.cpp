@@ -50,7 +50,7 @@ tan_header_parse(tan_connection_t *conn)
         value = json_decode(conn->event.header);
     } catch (...) {
 
-        tan_log_info(TAN_INVALID_REQUEST_HEADER,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_REQUEST_HEADER,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -59,7 +59,7 @@ tan_header_parse(tan_connection_t *conn)
     conn->event.user_api = value["user_api"].asString();
     if (conn->event.user_api.empty()) {
 
-        tan_log_info(TAN_INVALID_USER_API,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_USER_API_NOT_FOUND,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -67,12 +67,12 @@ tan_header_parse(tan_connection_t *conn)
 
     conn->event.content_length = value["json_length"].asInt();
 
-    if (conn->event.content_length > tan_get_server_cfg()->client_max_json_size ||
+    if (conn->event.content_length > tan_get_server_cfg()->client_max_body_size ||
         conn->event.content_length <= 0)
     {
-        tan_log_info(TAN_INVALID_JSON_LENGTH,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_JSON_LENGTH,
                      conn->event.content_length,
-                     tan_get_server_cfg()->client_max_json_size,
+                     tan_get_server_cfg()->client_max_body_size,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
@@ -143,7 +143,7 @@ tan_packet_handler(tan_connection_t *conn)
     api = tan_get_user_api_handler(func);
     if (api == NULL) {
 
-        tan_log_info(TAN_FUNCTION_NOT_FOUND,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
                      func,
                      p[0], p[1], p[2], p[3]);
 
@@ -154,7 +154,7 @@ tan_packet_handler(tan_connection_t *conn)
         value = json_decode(conn->event.content.get());
     } catch (...) {
 
-        tan_log_info(TAN_INVALID_JSON_STRING,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_JSON_STRING,
                      func,
                      p[0], p[1], p[2], p[3]);
 
