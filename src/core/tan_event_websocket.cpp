@@ -233,7 +233,7 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
 
     if (len < 126) {
         conn->event.content_length = len;
-    } else if (len < 65536) {
+    } else if (len == 126) {
 
         tan_event_ws_payload_len_larger_125_bytes(conn);
         return;
