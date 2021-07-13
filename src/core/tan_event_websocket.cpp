@@ -14,17 +14,17 @@
 
 
 /* length <= 125  */
-#define TAN_WS_GET_PAYLOAD_LEN_7(buf)                 \
+#define TAN_WS_GET_PAYLOAD_LEN_7(buf)     \
     (buf & 0x7f)
 
 /* length > 125 && length <= 65535  */
-#define TAN_WS_GET_PAYLOAD_LEN_7_16(buf)              \
-    ((buf[0] & 0xff << 8) | (buf[1] & 0xff))
+#define TAN_WS_GET_PAYLOAD_LEN_7_16(buf)  \
+    ((buf[0] << 8) | (buf[1] & 0xff))
 
 /* length > 65535  */
-#define TAN_WS_GET_PAYLOAD_LEN_7_64(buf)              \
-    ((buf[4] & 0xff << 24) | (buf[5] & 0xff << 16) |  \
-        (buf[6] & 0xff << 8) | (buf[7] & 0xff))
+#define TAN_WS_GET_PAYLOAD_LEN_7_64(buf)  \
+    ((buf[4] << 24) | (buf[5] << 16) |    \
+        (buf[6] << 8) | (buf[7] & 0xff))
 
 
 typedef enum {
