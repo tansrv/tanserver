@@ -128,13 +128,16 @@ tan_ws_recv_header(tan_connection_t *conn)
 static tan_int_t
 tan_ws_handshake(tan_connection_t *conn)
 {
-    char        *sec_ws_accept, buf[TAN_MAX_STR_SIZE];
-    std::string  key;
+    char          *sec_ws_accept, buf[TAN_MAX_STR_SIZE];
+    std::string    key;
+    const u_char  *p;
 
     try {
         key = tan_http_header_get_value(conn->event.header.c_str(),
                                         "Sec-WebSocket-Key");
     } catch (...) {
+
+        p = tan_get_hostaddr(&conn->info.addr);
 
         tan_log_info(TAN_WEBSOCKET_ERROR_SEC_WEBSOCKET_KEY_NOT_FOUND,
                      p[0], p[1], p[2], p[3]);
@@ -314,8 +317,9 @@ out_disconnect:
 static void
 tan_event_ws_recv_mask(tan_connection_t *conn)
 {
-    int        byte_read;
-    tan_ssl_t  ret;
+    int            byte_read;
+    tan_ssl_t      ret;
+    const u_char  *p;
 
     conn->event.mask[4] = '\0';
 
@@ -343,6 +347,8 @@ tan_event_ws_recv_mask(tan_connection_t *conn)
     if (conn->event.content_length >
         tan_get_server_cfg()->client_max_body_size)
     {
+        p = tan_get_hostaddr(&conn->info.addr);
+
         tan_log_info(TAN_WEBSOCKET_ERROR_PAYLOAD_LENGTH_TOO_LARGE,
                      conn->event.content_length,
                      tan_get_server_cfg()->client_max_body_size,
@@ -486,8 +492,8 @@ tan_get_custom_protocol_header(char *buf,
     *header_index = content.find("\r\n");
     if (*header_index >= TAN_MAX_STR_SIZE) {
 
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_REQUEST_HEADER_TOO_LARGE,
-                     p[0], p[1], p[2], p[3]);
+       // tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_REQUEST_HEADER_TOO_LARGE,
+       //              p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
     }
