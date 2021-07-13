@@ -92,6 +92,7 @@ tan_list_node_t *tan_get_idle_connections();
 void tan_set_current_connection(tan_connection_t *conn);
 tan_connection_t *tan_get_current_connection();
 void tan_write_access_log(tan_connection_t *conn);
+void tan_connection_send_packet(tan_connection_t *conn);
 void tan_free_client_connection(tan_connection_t *conn);
 
 

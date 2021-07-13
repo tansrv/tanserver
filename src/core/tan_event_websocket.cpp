@@ -7,11 +7,10 @@
 #include "tan_core.h"
 #include "tan_events.h"
 #include "tan_http.h"
-#include "tan_jsoncpp.h"
-#include "tan_user_api.h"
 #include "tan_connection.h"
 #include "tan_openssl_ssl.h"
 #include "tan_websocket.h"
+#include "tan_custom_protocol.h"
 
 
 /* length <= 125  */
@@ -35,26 +34,46 @@ typedef enum {
 } tan_ws_read_header_status_e;
 
 
+/* Websocket handshake.  */
 static int tan_ws_recv_header(tan_connection_t *conn);
 static tan_int_t tan_ws_handshake(tan_connection_t *conn);
 static void tan_ws_make_response_header(char *buf,
                                         const char *sec_ws_accept);
+
+/*
+ * Receive a WebSocket frame.
+ *
+ * Frame format:
+ *    0                   1                   2                   3
+ *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *   +-+-+-+-+-------+-+-------------+-------------------------------+
+ *   |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+ *   |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+ *   |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+ *   | |1|2|3|       |K|             |                               |
+ *   +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+ *   |     Extended payload length continued, if payload len == 127  |
+ *   + - - - - - - - - - - - - - - - +-------------------------------+
+ *   |                               |Masking-key, if MASK set to 1  |
+ *   +-------------------------------+-------------------------------+
+ *   | Masking-key (continued)       |          Payload Data         |
+ *   +-------------------------------- - - - - - - - - - - - - - - - +
+ *   :                     Payload Data continued ...                :
+ *   + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+ *   |                     Payload Data continued ...                |
+ *   +---------------------------------------------------------------+
+ */
 static void tan_event_ws_recv_2_bytes(tan_connection_t *conn);
 static void tan_event_ws_payload_len_larger_125_bytes(tan_connection_t *conn);
 static void tan_event_ws_payload_len_larger_65535_bytes(tan_connection_t *conn);
 static void tan_event_ws_recv_mask(tan_connection_t *conn);
 static void tan_event_ws_recv_raw_data(tan_connection_t *conn);
+
 static void tan_ws_decode_raw_data(tan_connection_t *conn,
                                    std::string &content);
-static tan_int_t tan_get_custom_protocol_header(char *buf,
-                                                const std::string &content,
-                                                int *header_index);
-static tan_int_t tan_custom_protocol_header_parse(tan_connection_t *conn,
-                                                  const std::string &content,
-                                                  int *header_index);
-static tan_int_t tan_custom_protocol_body_parse(tan_connection_t *conn,
-                                                const char *body);
-static void tan_send_packet(tan_connection_t *conn);
+static tan_int_t tan_get_custom_protocol_header(tan_connection_t *conn,
+                                                char *header,
+                                                const std::string &content);
 
 
 void
@@ -154,6 +173,7 @@ tan_ws_handshake(tan_connection_t *conn)
 
     conn->event.ws_response_header = buf;
 
+    /* Send response header.  */
     if (tan_ssl_write(conn->info.ssl,
                       conn->event.ws_response_header.c_str(),
                       conn->event.ws_response_header.length())
@@ -183,7 +203,8 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
     unsigned int   len;
     unsigned char  buf[3];
 
-    buf[2]    = '\0';
+    buf[2] = '\0';
+
     byte_read = 0;
 
     ret = tan_ssl_read(&byte_read, conn->info.ssl, buf, 2);
@@ -204,7 +225,8 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    if (buf[0] != 0x81)
+    /* opcode should be 0x1 (text).  */
+    if (tan_unlikely(buf[0] != 0x81))
         goto out_disconnect;
 
     len = TAN_WS_GET_PAYLOAD_LEN_7(buf[1]);
@@ -215,7 +237,6 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
 
         tan_event_ws_payload_len_larger_125_bytes(conn);
         return;
-
     } else {
 
         tan_event_ws_payload_len_larger_65535_bytes(conn);
@@ -235,12 +256,12 @@ out_disconnect:
 static void
 tan_event_ws_payload_len_larger_125_bytes(tan_connection_t *conn)
 {
-    int           byte_read;
-    char          buf[3];
-    tan_ssl_t     ret;
-    unsigned int  len;
+    int        byte_read;
+    char       buf[3];
+    tan_ssl_t  ret;
 
-    buf[2]    = '\0';
+    buf[2] = '\0';
+
     byte_read = 0;
 
     ret = tan_ssl_read(&byte_read, conn->info.ssl, buf, 2);
@@ -276,12 +297,12 @@ out_disconnect:
 static void
 tan_event_ws_payload_len_larger_65535_bytes(tan_connection_t *conn)
 {
-    int           byte_read;
-    char          buf[9];
-    tan_ssl_t     ret;
-    unsigned int  len;
+    int        byte_read;
+    char       buf[9];
+    tan_ssl_t  ret;
 
-    buf[8]    = '\0';
+    buf[8] = '\0';
+
     byte_read = 0;
 
     ret = tan_ssl_read(&byte_read, conn->info.ssl, buf, 8);
@@ -344,6 +365,7 @@ tan_event_ws_recv_mask(tan_connection_t *conn)
         goto out_disconnect;
     }
 
+    /* Check payload length.  */
     if (conn->event.content_length >
         tan_get_server_cfg()->client_max_body_size)
     {
@@ -374,7 +396,7 @@ static void
 tan_event_ws_recv_raw_data(tan_connection_t *conn)
 {
     tan_ssl_t    ret;
-    int          header_index;
+    char         header[TAN_MAX_STR_SIZE];
     std::string  content;
 
     ret = tan_ssl_read(&conn->event.content_read,
@@ -401,21 +423,31 @@ tan_event_ws_recv_raw_data(tan_connection_t *conn)
     /* We got something like: {"user_api":"api","json_length":2}\r\n{}  */
     tan_ws_decode_raw_data(conn, content);
 
-    if (tan_custom_protocol_header_parse(conn, content, &header_index)
+    tan_memzero(header, TAN_MAX_STR_SIZE);
+
+    if (tan_get_custom_protocol_header(conn, header, content)
         != TAN_OK)
     {
         goto out_disconnect;
     }
 
-    if (tan_custom_protocol_body_parse(conn, content.c_str() + header_index)
+    if (tan_parse_custom_protocol_header(conn, header)
         != TAN_OK)
     {
         goto out_disconnect;
     }
 
-    tan_send_packet(conn);
+    if (tan_parse_custom_protocol_body_and_call_api(conn,
+        content.c_str() + strlen(header)) != TAN_OK)
+    {
+        goto out_disconnect;
+    }
 
-    conn->event.read    = tan_event_select_protocol;
+    conn->event.packet = tan_ws_make_packet(conn->event.packet.c_str());
+
+    tan_connection_send_packet(conn);
+
+    conn->event.read    = tan_event_close;
     conn->status.flags |= TAN_CONN_STATUS_CLOSING;
 
     return;
@@ -444,131 +476,24 @@ tan_ws_decode_raw_data(tan_connection_t *conn,
 
 
 static tan_int_t
-tan_custom_protocol_header_parse(tan_connection_t *conn,
-                                 const std::string &content,
-                                 int *header_index)
+tan_get_custom_protocol_header(tan_connection_t *conn,
+                               char *header,
+                               const std::string &content)
 {
-    char           header[TAN_MAX_STR_SIZE];
-    tan_int_t      ret;
-    Json::Value    value;
+    int            index;
     const u_char  *p;
 
-    tan_memzero(header, TAN_MAX_STR_SIZE);
+    index = content.find("\r\n");
+    if (index >= TAN_MAX_STR_SIZE) {
 
-    ret = tan_get_custom_protocol_header(header, content, header_index);
-    if (ret != TAN_OK)
-        return ret;
+        p = tan_get_hostaddr(&conn->info.addr);
 
-    p = tan_get_hostaddr(&conn->info.addr);
-
-    try {
-        value = json_decode(header);
-    } catch (...) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_REQUEST_HEADER,
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_REQUEST_HEADER_TOO_LARGE,
                      p[0], p[1], p[2], p[3]);
 
         return TAN_ERROR;
     }
 
-    conn->event.user_api = value["user_api"].asString();
-    if (conn->event.user_api.empty()) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_USER_API_NOT_FOUND,
-                     p[0], p[1], p[2], p[3]);
-
-        return TAN_ERROR;
-    }
-
+    memcpy(header, content.c_str(), index);
     return TAN_OK;
-}
-
-
-static tan_int_t
-tan_get_custom_protocol_header(char *buf,
-                               const std::string &content,
-                               int *header_index)
-{
-    *header_index = content.find("\r\n");
-    if (*header_index >= TAN_MAX_STR_SIZE) {
-
-       // tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_REQUEST_HEADER_TOO_LARGE,
-       //              p[0], p[1], p[2], p[3]);
-
-        return TAN_ERROR;
-    }
-
-    memcpy(buf, content.c_str(), *header_index);
-    return TAN_OK;
-}
-
-
-static tan_int_t
-tan_custom_protocol_body_parse(tan_connection_t *conn,
-                               const char *body)
-{
-    tan_int_t       ret;
-    const u_char   *p;
-    const char     *func;
-    Json::Value     value;
-    tan_user_api_t  api;
-
-    p = tan_get_hostaddr(&conn->info.addr);
-
-    func = conn->event.user_api.c_str();
-
-    api = tan_get_user_api_handler(func);
-    if (api == NULL) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
-                     func,
-                     p[0], p[1], p[2], p[3]);
-
-        return TAN_ERROR;
-    }
-
-    try {
-        value = json_decode(body);
-    } catch (...) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_JSON_STRING,
-                     func,
-                     p[0], p[1], p[2], p[3]);
-
-        return TAN_ERROR;
-    }
-
-    tan_set_current_connection(conn);
-
-    try {
-        conn->event.packet = tan_ws_make_packet(api(value).c_str());
-    } catch (...) {
-        return TAN_ERROR;
-    }
-
-    return TAN_OK;
-}
-
-
-static void
-tan_send_packet(tan_connection_t *conn)
-{
-    tan_ssl_t  ret;
-
-    ret = tan_ssl_write(conn->info.ssl, conn->event.packet.c_str(),
-                        conn->event.packet.length());
-
-    switch (ret) {
-
-    case TAN_SSL_WRITE_OK:
-
-        tan_handled_requests_atomic_inc();
-        tan_write_access_log(conn);
-
-        break;
-
-    case TAN_SSL_CONTINUE:
-
-        conn->status.flags |= TAN_CONN_STATUS_WRITE_PENDING;
-    }
 }

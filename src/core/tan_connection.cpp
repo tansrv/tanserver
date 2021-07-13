@@ -126,6 +126,30 @@ tan_get_request_time(tan_connection_t *conn)
 
 
 void
+tan_connection_send_packet(tan_connection_t *conn)
+{
+    tan_ssl_t  ret;
+
+    ret = tan_ssl_write(conn->info.ssl, conn->event.packet.c_str(),
+                        conn->event.packet.length());
+
+    switch (ret) {
+
+    case TAN_SSL_WRITE_OK:
+
+        tan_handled_requests_atomic_inc();
+        tan_write_access_log(conn);
+
+        break;
+
+    case TAN_SSL_CONTINUE:
+
+        conn->status.flags |= TAN_CONN_STATUS_WRITE_PENDING;
+    }
+}
+
+
+void
 tan_free_client_connection(tan_connection_t *conn)
 {
     SSL_shutdown(conn->info.ssl);
@@ -138,7 +162,7 @@ tan_free_client_connection(tan_connection_t *conn)
 
     conn->status.flags       = 0;
     conn->status.seed        = rand_r(&conn->status.seed);
-    conn->status.instance    =~ conn->status.instance;
+    conn->status.instance   =~ conn->status.instance;
 
     tan_list_push_back(&idle_connections, &conn->node);
 

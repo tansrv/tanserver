@@ -22,6 +22,7 @@ void tan_event_custom_protocol(tan_connection_t *conn);
 void tan_event_websocket(tan_connection_t *conn);
 
 void tan_event_write(tan_connection_t *conn);
+void tan_event_close(tan_connection_t *conn);
 
 
 #endif /* TAN_EVENTS_H */
