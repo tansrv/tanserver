@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -116,12 +114,15 @@ tan_pg_conninfo_init(char *buf, tan_pg_cfg_t *cfg)
 
 
 std::string
-tan_pg_query(const char *func, const char *hostaddr,
-             const char *query, ...)
+pg_query(const char *hostaddr, const char *query, ...)
 {
     PGconn      *conn;
     va_list      arg;
+    const char  *func;
     std::string  ret;
+
+    /* Get the API name.  */
+    func = tan_get_current_connection()->event.user_api.c_str();
 
     conn = tan_get_pgconn(func, hostaddr);
     if (conn == NULL)
