@@ -44,6 +44,16 @@ static int getParentIndex(int i)
     return (i-2+(i&1))>>1;
 }
 
+static int getLeftIndex(int i)
+{
+    return (2*i) + 1;
+}
+
+static int getRightIndex(int i)
+{
+    return (2*i) + 2;
+}
+
 Theap* createHeap(time_t key, 
                   void *value)
 {
@@ -59,14 +69,63 @@ Theap* createHeap(time_t key,
     return hh;
 }
 
-Tnode* minPeek(Theap *hh)
+void* minPeek(Theap *hh)
 {
-    return hh->arr[0];
+    return hh->arr[0]->value;
 }
 
-Tnode* removeMin()
+void* removeMin(Theap *hh)
 {
+    if(hh->used == 0)
+        return NULL;
 
+    void* out = minPeek(hh);
+    free(hh->arr[0]);
+
+    //swap rightmost leaf and root 
+    hh->arr[0] = hh->arr[hh->used-1];
+    hh->arr[hh->used-1] = NULL;
+    hh->used--;
+
+    //downheap
+    int    c = 0;
+    int    l;
+    int    r;
+    Tnode* tmp;
+    while(c < hh->used)
+    {
+        l = getLeftIndex(c);
+        r = getRightIndex(c);
+        if(r < hh->used && l < hh->used && hh->arr[l]->key < hh->arr[r]->key)
+        {
+            //left is smaller
+            if(hh->arr[c]->key > hh->arr[l]->key){
+                //swap arr[c] and left child
+                tmp = hh->arr[c];
+                hh->arr[c] = hh->arr[l];
+                hh->arr[l] = tmp;
+                c = l;
+            }
+            else
+                break;
+        }
+        else
+        {
+            //right is smaller
+            if(r < hh->used && hh->arr[c]->key > hh->arr[r]->key)
+            {
+                //swap arr[c] and right child
+                tmp = hh->arr[c];
+                hh->arr[c] = hh->arr[r];
+                hh->arr[r] = tmp;
+                c = r;
+            }
+            else
+                break;
+        }
+    }
+
+    return out;
 }
 
 void addNode(Theap *hh,
