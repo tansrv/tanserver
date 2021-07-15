@@ -42,9 +42,12 @@ PyObject *tan_py_json_string_to_object(const char *json_string);
  * @param func:   Python function name
  * @param object: The PyObject passed to the Python function
  *
- * @return The string returned by the Python function.
+ * @return If the function does not exist, it returns NULL,
+ *         otherwise returns PyObject *.
+ *
+ * @note Call PyString_AsString(obj) to get the string.
  */
-char *tan_py_call_function(const char *func, PyObject *object);
+PyObject *tan_py_call_function(const char *func, PyObject *object);
 
 
 #ifdef __cplusplus
