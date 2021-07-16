@@ -1,30 +1,33 @@
 /*
  * Copyright (C) tanserver.org
+ * Copyright (C) Daniele Affinita
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
+#include "tan_event_timer.h"
 
 
 typedef struct {
-    time_t           expires;
-    void            *data;
-    unsigned         u32;
-    void           (*handler)(void *data, unsigned u32);
-    tan_list_node_t  node;
+    time_t    expires;
+    void     *data;
+    unsigned  u32;
+    void    (*handler)(void *data, unsigned u32);
 } tan_timer_t;
 
 
-static tan_list_node_t  timers;
+static tan_heap_t  *timers;
 
 
-void
+tan_int_t
 tan_event_timer_init()
 {
-    tan_list_init(&timers);
+    timers = tan_heap_create();
+    if (timers == NULL)
+        return TAN_ERROR;
+
+    return TAN_OK;
 }
 
 
@@ -32,6 +35,7 @@ tan_int_t
 tan_event_add_timer(void (*handler)(void *data, unsigned u32),
                     void *data, unsigned u32, time_t sec)
 {
+    tan_int_t     ret;
     tan_timer_t  *timer;
 
     timer = (tan_timer_t *)malloc(sizeof(tan_timer_t));
@@ -46,7 +50,13 @@ tan_event_add_timer(void (*handler)(void *data, unsigned u32),
     timer->handler = handler;
     timer->expires = tan_get_time() + sec;
 
-    tan_list_push_back(&timers, &timer->node);
+    ret = tan_heap_add_node(timers, tan_get_time() + sec, timer);
+    if (ret != TAN_OK) {
+
+        free(timer);
+        return ret;
+    }
+
     return TAN_OK;
 }
 
@@ -54,17 +64,20 @@ tan_event_add_timer(void (*handler)(void *data, unsigned u32),
 void
 tan_event_expire_timers()
 {
-    tan_timer_t      *timer;
-    tan_list_node_t  *tmp;
+    tan_timer_t  *timer;
 
-    tan_list_for_each(&timers, timer, tmp, tan_timer_t, node) {
- 
-        if (tan_get_time() >= timer->expires) {
+    for (;;) {
 
-            tan_list_remove(&timer->node);
+        if (!timers->used)
+            return;
 
-            timer->handler(timer->data, timer->u32);
-            free(timer);
-        }
+        timer = tan_heap_min_peek(timers);
+        if (tan_get_time() < timer->expires)
+            return;
+
+        timer = tan_heap_remove_min(timers);
+
+        timer->handler(timer->data, timer->u32);
+        free(timer);
     }
 }

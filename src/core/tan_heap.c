@@ -21,7 +21,7 @@ static int tan_heap_get_right_index(int i);
 
 
 tan_heap_t *
-tan_heap_create(time_t key, void *value)
+tan_heap_create()
 {
     tan_heap_t  *hh;
 
@@ -44,14 +44,6 @@ tan_heap_create(time_t key, void *value)
 
     hh->size = TAN_HEAP_INIT_SIZE;
     hh->used = 0;
-
-    if (tan_heap_create_node(hh, key, value) != TAN_OK) {
-
-        free(hh->arr);
-        free(hh);
-
-        return NULL;
-    }
 
     return hh;
 }

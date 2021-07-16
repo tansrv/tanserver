@@ -166,9 +166,11 @@ tan_worker_process_init()
 {
     tan_int_t  ret;
 
-    tan_event_timer_init();
-
     tan_time_update();
+
+    ret = tan_event_timer_init();
+    if (ret != TAN_OK)
+        return ret;
 
     ret = tan_idle_connections_init();
     if (ret != TAN_OK)

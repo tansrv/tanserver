@@ -23,13 +23,12 @@ extern "C" {
  * char a = 'a';
  * char b = 'b';
  * char c = 'c';
- * char d = 'd';
  *
- * tan_heap_t *th = tan_heap_create(1, &a);
+ * tan_heap_t *th = tan_heap_create();
  *
+ * tan_heap_add_node(th, 1, &a);
  * tan_heap_add_node(th, 2, &b);
  * tan_heap_add_node(th, 3, &c);
- * tan_heap_add_node(th, 4, &d);
  *
  * tan_heap_print(th);
  *
@@ -54,7 +53,7 @@ typedef struct {
 } tan_heap_t;
 
 
-tan_heap_t *tan_heap_create(time_t key, void *value);
+tan_heap_t *tan_heap_create();
 tan_int_t tan_heap_add_node(tan_heap_t *hh, time_t key, void *value);
 void *tan_heap_min_peek(tan_heap_t *hh);
 void *tan_heap_remove_min(tan_heap_t *hh);
