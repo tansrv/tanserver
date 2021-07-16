@@ -54,41 +54,34 @@ static int getRightIndex(int i)
     return (2*i) + 2;
 }
 
-Theap* createHeap(time_t key, 
-                  void *value)
+//return index 
+static int findNode(Theap *hh,
+                    int index,
+                    time_t key)
 {
-    //initial size: 20
-    Theap* hh = (Theap*) malloc(sizeof(Theap));
-    hh->arr = (Tnode**) calloc(INIT_SIZE, sizeof(Tnode*));
+    if(index >= hh->used)
+        return -1;
+    if(getKey(hh->arr[index]) == key)
+        return index;
+    
+    int ret;
 
-    hh->size = INIT_SIZE;
-    hh->used = 0;
+    ret = findNode(hh,
+                   getLeftIndex(index),
+                   key);
 
-    createNode(hh, key, value);
+    if(ret == -1)
+        ret = findNode(hh,
+                       getRightIndex(index),
+                       key);
 
-    return hh;
+    return ret;    
 }
 
-void* minPeek(Theap *hh)
+static void downheap(Theap *hh,
+                     int index)
 {
-    return hh->arr[0]->value;
-}
-
-void* removeMin(Theap *hh)
-{
-    if(hh->used == 0)
-        return NULL;
-
-    void* out = minPeek(hh);
-    free(hh->arr[0]);
-
-    //swap rightmost leaf and root 
-    hh->arr[0] = hh->arr[hh->used-1];
-    hh->arr[hh->used-1] = NULL;
-    hh->used--;
-
-    //downheap
-    int    c = 0;
+    int    c = index;
     int    l;
     int    r;
     Tnode* tmp;
@@ -123,11 +116,50 @@ void* removeMin(Theap *hh)
             else
                 break;
         }
-    }
+    }    
+}
+
+Theap* createHeap(time_t key, 
+                  void *value)
+{
+    //initial size: 20
+    Theap* hh = (Theap*) malloc(sizeof(Theap));
+    hh->arr = (Tnode**) calloc(INIT_SIZE, sizeof(Tnode*));
+
+    hh->size = INIT_SIZE;
+    hh->used = 0;
+
+    createNode(hh, key, value);
+
+    return hh;
+}
+
+//O(1)
+void* minPeek(Theap *hh)
+{
+    return hh->arr[0]->value;
+}
+
+//O(log n)
+void* removeMin(Theap *hh)
+{
+    if(hh->used == 0)
+        return NULL;
+
+    void* out = minPeek(hh);
+    free(hh->arr[0]);
+
+    //swap rightmost leaf and root 
+    hh->arr[0] = hh->arr[hh->used-1];
+    hh->arr[hh->used-1] = NULL;
+    hh->used--;
+
+    downheap(hh, 0);
 
     return out;
 }
 
+//O(log n)
 void addNode(Theap *hh,
              time_t key, 
              void* value)
@@ -138,7 +170,8 @@ void addNode(Theap *hh,
     int c = hh->used-1;
     int par;
     Tnode* tmp;
-    while(c > 0){
+    while(c > 0)
+    {
         par = getParentIndex(c);
         if(getKey(hh->arr[c]) >= getKey(hh->arr[par]))
             break;
@@ -148,6 +181,28 @@ void addNode(Theap *hh,
         hh->arr[par] = tmp;
         c = par;
     }
+}
+
+// O(n)
+void* removeNode(Theap *hh,
+                 time_t key)
+{      
+    int   targetIndex = findNode(hh, 0, key);
+    void* out;
+
+    if(targetIndex == -1)
+        return NULL;
+
+    out = getValue(hh->arr[targetIndex]);
+
+    //swap rightmost leaf and target 
+    hh->arr[targetIndex] = hh->arr[hh->used-1];
+    hh->arr[hh->used-1] = NULL;
+    hh->used--;
+
+    downheap(hh, targetIndex);
+
+    return out;
 }
 
 void printHeap(Theap *hh){
