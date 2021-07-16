@@ -2,158 +2,256 @@
  * Copyright (C) tanserver.org
  * Copyright (C) Daniele Affinita
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
+
+#include "tan_core.h"
 #include "tan_heap.h"
 
-static void createNode(Theap *hp,
-                       time_t key,
-                       void *value)
-{
-    if(hp->used >= hp->size)
-    {
-        Tnode** hhNew = (Tnode**) calloc(2*hp->size, sizeof(Tnode*));
-        //if array is full double its dimension
-        for(int i = 0; i<hp->size; i++)
-            hhNew[i] = hp->arr[i];
 
-        free(hp->arr);
-        hp->arr = hhNew;
-        hp->size = 2*hp->size;
+#define TAN_HEAP_INIT_SIZE  20
+
+
+static tan_int_t tan_heap_create_node(tan_heap_t *hp, time_t key,
+                                      void *value);
+static int tan_heap_get_parent_index(int i);
+static time_t tan_heap_get_key(tan_heap_node_t *n);
+static int tan_heap_get_left_index(int i);
+static int tan_heap_get_right_index(int i);
+
+
+tan_heap_t *
+tan_heap_create(time_t key, void *value)
+{
+    tan_heap_t  *hh;
+
+    hh = (tan_heap_t *)malloc(sizeof(tan_heap_t));
+    if (hh == NULL) {
+
+        tan_stderr_error(errno, "malloc() failed");
+        return NULL;
     }
-    hp->arr[hp->used] = (Tnode*) malloc(sizeof(Tnode));
-    hp->arr[hp->used]->key = key;
-    hp->arr[hp->used]->value = value;
-    hp->used++;
-}
 
-static time_t getKey(Tnode *n)
-{
-    return n->key;
-}
+    hh->arr = (tan_heap_node_t **)calloc(TAN_HEAP_INIT_SIZE,
+                                         sizeof(tan_heap_node_t *));
 
-static void* getValue(Tnode *n)
-{
-    return n->value;
-}
+    if (hh->arr == NULL) {
+        free(hh);
 
-static int getParentIndex(int i)
-{
-    return (i-2+(i&1))>>1;
-}
+        tan_stderr_error(errno, "calloc() failed");
+        return NULL;
+    }
 
-static int getLeftIndex(int i)
-{
-    return (2*i) + 1;
-}
-
-static int getRightIndex(int i)
-{
-    return (2*i) + 2;
-}
-
-Theap* createHeap(time_t key, 
-                  void *value)
-{
-    //initial size: 20
-    Theap* hh = (Theap*) malloc(sizeof(Theap));
-    hh->arr = (Tnode**) calloc(INIT_SIZE, sizeof(Tnode*));
-
-    hh->size = INIT_SIZE;
+    hh->size = TAN_HEAP_INIT_SIZE;
     hh->used = 0;
 
-    createNode(hh, key, value);
+    if (tan_heap_create_node(hh, key, value) != TAN_OK) {
+
+        free(hh->arr);
+        free(hh);
+
+        return NULL;
+    }
 
     return hh;
 }
 
-void* minPeek(Theap *hh)
+
+static tan_int_t
+tan_heap_create_node(tan_heap_t *hp, time_t key, void *value)
+{
+    int                k;
+    tan_heap_node_t  **hh_new;
+
+    if (hp->used >= hp->size) {
+
+        hh_new = (tan_heap_node_t **)calloc(2 * hp->size,
+                                            sizeof(tan_heap_node_t *));
+
+        if (hh_new == NULL) {
+
+            tan_log_crit(errno, "calloc() failed", NULL);
+            return TAN_ERROR;
+        }
+
+        /* If array is full double its dimension.  */
+        for (k = 0; k < hp->size; ++k)
+            hh_new[k] = hp->arr[k];
+
+        free(hp->arr);
+
+        hp->arr  = hh_new;
+        hp->size = 2 * hp->size;
+    }
+
+    hp->arr[hp->used] = (tan_heap_node_t *)malloc(sizeof(tan_heap_node_t));
+    if (hp->arr[hp->used] == NULL) {
+
+        tan_log_crit(errno, "malloc() failed", NULL);
+        return TAN_ERROR;
+    }
+
+    hp->arr[hp->used]->key   = key;
+    hp->arr[hp->used]->value = value;
+
+    ++hp->used;
+
+    return TAN_OK;
+}
+
+
+void *
+tan_heap_min_peek(tan_heap_t *hh)
 {
     return hh->arr[0]->value;
 }
 
-void* removeMin(Theap *hh)
+
+tan_int_t
+tan_heap_add_node(tan_heap_t *hh, time_t key, void *value)
 {
-    if(hh->used == 0)
+    int               c, par;
+    tan_int_t         ret;
+    tan_heap_node_t  *tmp;
+
+    ret = tan_heap_create_node(hh, key, value);
+    if (ret != TAN_OK)
+        return ret;
+
+    /* upheap  */
+    c = hh->used - 1;
+    while (c > 0) {
+
+        par = tan_heap_get_parent_index(c);
+        if (tan_heap_get_key(hh->arr[c]) >= tan_heap_get_key(hh->arr[par]))
+            break;
+
+        /* swap  */
+        tmp = hh->arr[c];
+
+        hh->arr[c]   = hh->arr[par];
+        hh->arr[par] = tmp;
+
+        c = par;
+    }
+
+    return TAN_OK;
+}
+
+
+static int
+tan_heap_get_parent_index(int i)
+{
+    return (i - 2 + (i & 1)) >> 1;
+}
+
+
+static time_t
+tan_heap_get_key(tan_heap_node_t *n)
+{
+    return n->key;
+}
+
+
+void *
+tan_heap_remove_min(tan_heap_t *hh)
+{
+    int               c, l, r;
+    void             *out;
+    tan_heap_node_t  *tmp;
+
+    if (!hh->used)
         return NULL;
 
-    void* out = minPeek(hh);
+    out = tan_heap_min_peek(hh);
     free(hh->arr[0]);
 
-    //swap rightmost leaf and root 
-    hh->arr[0] = hh->arr[hh->used-1];
-    hh->arr[hh->used-1] = NULL;
-    hh->used--;
+    /* Swap rightmost leaf and root.  */
+    hh->arr[0]            = hh->arr[hh->used - 1];
+    hh->arr[hh->used - 1] = NULL;
 
-    //downheap
-    int    c = 0;
-    int    l;
-    int    r;
-    Tnode* tmp;
-    while(c < hh->used)
-    {
-        l = getLeftIndex(c);
-        r = getRightIndex(c);
-        if(r < hh->used && l < hh->used && hh->arr[l]->key < hh->arr[r]->key)
+    --hh->used;
+
+    /* downheap  */
+    c = 0;
+    while (c < hh->used) {
+
+        l = tan_heap_get_left_index(c);
+        r = tan_heap_get_right_index(c);
+
+        if (r < hh->used && l < hh->used &&
+            hh->arr[l]->key < hh->arr[r]->key)
         {
-            //left is smaller
-            if(hh->arr[c]->key > hh->arr[l]->key){
-                //swap arr[c] and left child
+            /* Left is smaller.  */
+            if (hh->arr[c]->key > hh->arr[l]->key) {
+                /* Swap arr[c] and left child.  */
                 tmp = hh->arr[c];
+
                 hh->arr[c] = hh->arr[l];
                 hh->arr[l] = tmp;
+
                 c = l;
-            }
-            else
+            } else {
                 break;
-        }
-        else
-        {
-            //right is smaller
-            if(r < hh->used && hh->arr[c]->key > hh->arr[r]->key)
-            {
-                //swap arr[c] and right child
+            }
+        } else {
+            /* Right is smaller.  */
+            if (r < hh->used && hh->arr[c]->key > hh->arr[r]->key) {
+                /* Swap arr[c] and right child.  */
                 tmp = hh->arr[c];
+
                 hh->arr[c] = hh->arr[r];
                 hh->arr[r] = tmp;
+
                 c = r;
-            }
-            else
+            } else {
                 break;
+            }
         }
     }
 
     return out;
 }
 
-void addNode(Theap *hh,
-             time_t key, 
-             void* value)
+
+static int
+tan_heap_get_left_index(int i)
 {
-    createNode(hh, key, value);
-    
-    //upheap
-    int c = hh->used-1;
-    int par;
-    Tnode* tmp;
-    while(c > 0){
-        par = getParentIndex(c);
-        if(getKey(hh->arr[c]) >= getKey(hh->arr[par]))
-            break;
-        //swap
-        tmp = hh->arr[c];
-        hh->arr[c] = hh->arr[par];
-        hh->arr[par] = tmp;
-        c = par;
-    }
+    return (2 * i) + 1;
 }
 
-void printHeap(Theap *hh){
+
+static int
+tan_heap_get_right_index(int i)
+{
+    return (2 * i) + 2;
+}
+
+
+void
+tan_heap_destory(tan_heap_t *hh)
+{
+    int  k;
+
+    for (k = 0; k < hh->used; ++k)
+        free(hh->arr[k]);
+
+    free(hh->arr);
+    free(hh);
+}
+
+
+#if 0
+void
+tan_heap_print(tan_heap_t *hh)
+{
+    int  i;
+
     printf("[");
-    for(int i = 0; i<hh->used; i++)
+
+    for (i = 0; i < hh->used; ++i)
         printf("%lu ", hh->arr[i]->key);
-    
+
     printf("]\n");
 }
+#endif

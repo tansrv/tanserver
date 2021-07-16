@@ -2,8 +2,6 @@
  * Copyright (C) tanserver.org
  * Copyright (C) Daniele Affinita
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -18,55 +16,53 @@ extern "C" {
 
 #include "tan_core.h"
 
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-
-#define INIT_SIZE 20
-
-struct tan_node
-{
-    time_t key;
-    void   *value;
-};
-
-typedef struct tan_node Tnode;
-
-struct tan_heap
-{
-    Tnode** arr;
-    size_t size;
-    size_t used;
-};
-
-typedef struct tan_heap Theap;
 
 /*
-    Usage example:
-    
-    char a = 'a';
-    char b = 'b';
-    char c = 'c';
-    char d = 'd';
-    Theap* th = createHeap(1, &a);
-    addNode(th, 2, &b);
-    addNode(th, 3, &c);
-    addNode(th, 4, &d);
+ * Usage example:
+ *
+ * char a = 'a';
+ * char b = 'b';
+ * char c = 'c';
+ * char d = 'd';
+ *
+ * tan_heap_t *th = tan_heap_create(1, &a);
+ *
+ * tan_heap_add_node(th, 2, &b);
+ * tan_heap_add_node(th, 3, &c);
+ * tan_heap_add_node(th, 4, &d);
+ *
+ * tan_heap_print(th);
+ *
+ * char *get = tan_heap_remove_min(th);
+ *
+ * printf("%c\n", *get);
+ *
+ * tan_heap_print(th);
+ */
 
-    printHeap(th);
 
-    char* get = removeMin(th);
+typedef struct {
+    time_t             key;
+    void              *value;
+} tan_heap_node_t;
 
-	printf("%c\n", *get);
-	
-    printHeap(th);
-*/
 
-Theap* createHeap(time_t, void*);
-void* minPeek(Theap*);
-void* removeMin(Theap*);
-void addNode(Theap*, time_t, void*);
-void printHeap(Theap*);
+typedef struct {
+    size_t             size;
+    size_t             used;
+    tan_heap_node_t  **arr;
+} tan_heap_t;
+
+
+tan_heap_t *tan_heap_create(time_t key, void *value);
+tan_int_t tan_heap_add_node(tan_heap_t *hh, time_t key, void *value);
+void *tan_heap_min_peek(tan_heap_t *hh);
+void *tan_heap_remove_min(tan_heap_t *hh);
+void tan_heap_destory(tan_heap_t *hh);
+
+#if 0
+void tan_heap_print(tan_heap_t *hh);
+#endif
 
 
 #ifdef __cplusplus
