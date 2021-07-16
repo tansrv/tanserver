@@ -65,9 +65,10 @@ typedef struct tan_heap Theap;
 Theap* createHeap(time_t, void*);
 void* minPeek(Theap*);
 void* removeMin(Theap*);
-void* removeNode(Theap*, time_t);
+time_t removeNode(Theap*, void*);
 void addNode(Theap*, time_t, void*);
 void printHeap(Theap*);
+void deleteHeap(Theap*);
 
 #ifdef __cplusplus
 }

@@ -46,34 +46,34 @@ static int getParentIndex(int i)
 
 static int getLeftIndex(int i)
 {
-    return (2*i) + 1;
+    return (i<<1) + 1;
 }
 
 static int getRightIndex(int i)
 {
-    return (2*i) + 2;
+    return (i<<1) + 2;
 }
 
 //return index 
-static int findNode(Theap *hh,
-                    int index,
-                    time_t key)
+static int findNodeByValue(Theap *hh,
+                           int index,
+                           void *value)
 {
     if(index >= hh->used)
         return -1;
-    if(getKey(hh->arr[index]) == key)
+    if(getValue(hh->arr[index]) == value)
         return index;
     
     int ret;
 
-    ret = findNode(hh,
-                   getLeftIndex(index),
-                   key);
+    ret = findNodeByValue(hh,
+                          getLeftIndex(index),
+                          value);
 
     if(ret == -1)
-        ret = findNode(hh,
-                       getRightIndex(index),
-                       key);
+        ret = findNodeByValue(hh,
+                              getRightIndex(index),
+                              value);
 
     return ret;    
 }
@@ -137,7 +137,7 @@ Theap* createHeap(time_t key,
 //O(1)
 void* minPeek(Theap *hh)
 {
-    return hh->arr[0]->value;
+    return getValue(hh->arr[0]);
 }
 
 //O(log n)
@@ -184,16 +184,17 @@ void addNode(Theap *hh,
 }
 
 // O(n)
-void* removeNode(Theap *hh,
-                 time_t key)
+time_t removeNode(Theap *hh,
+                 void *value)
 {      
-    int   targetIndex = findNode(hh, 0, key);
-    void* out;
+    int    targetIndex = findNodeByValue(hh, 0, value);
+    time_t out;
 
     if(targetIndex == -1)
-        return NULL;
+        return -1;
 
-    out = getValue(hh->arr[targetIndex]);
+    out = getKey(hh->arr[targetIndex]);
+    free(hh->arr[targetIndex]);
 
     //swap rightmost leaf and target 
     hh->arr[targetIndex] = hh->arr[hh->used-1];
@@ -211,4 +212,13 @@ void printHeap(Theap *hh){
         printf("%lu ", hh->arr[i]->key);
     
     printf("]\n");
+}
+
+void deleteHeap(Theap* hh)
+{
+    for(int j = 0; j<hh->used; ++j)
+        free(hh->arr[j]);
+
+    free(hh->arr);
+    free(hh);
 }
