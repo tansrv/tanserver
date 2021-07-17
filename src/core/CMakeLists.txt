@@ -21,8 +21,4 @@ aux_source_directory(. SRCS)
 add_library(core SHARED ${SRCS})
 
 install(TARGETS core LIBRARY DESTINATION ${LIB})
-install(FILES user.h DESTINATION ${INCLUDE})
-install(FILES tanserver.h DESTINATION ${INCLUDE})
-install(FILES tan_postgresql.h DESTINATION ${INCLUDE})
-install(FILES tan_jsoncpp.h DESTINATION ${INCLUDE})
 install(FILES ../../misc/tanserver PERMISSIONS OWNER_EXECUTE DESTINATION /etc/init.d)

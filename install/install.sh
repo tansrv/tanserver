@@ -4,14 +4,11 @@
 # 2. libjsoncpp.so
 # 3. libcore.so
 # 4. libconfuse.so + libjsoncpp.so + libcore.so = tanserver (exe)
-# 5. libuser_api.so
-# 6. tanserver (run) -> libuser_api.so
 
-cd ../src/lib/confuse/build    && cmake .. && make && make install && \
-cd ../../jsoncpp/build/        && cmake .. && make && make install && \
-cd ../../../core/build/        && cmake .. && make && make install && \
-cd ../../build/                && cmake .. && make && make install && \
-cd /usr/local/tanserver/build/ && cmake .  && make && make install
+cd ../src/lib/confuse/build && cmake .. && make && make install && \
+cd ../../jsoncpp/build/     && cmake .. && make && make install && \
+cd ../../../core/build/     && cmake .. && make && make install && \
+cd ../../build/             && cmake .. && make && make install && \
 
 if [ $? -ne 0 ]; then
   echo -e "\ntanserver: install failed\n"

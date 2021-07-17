@@ -13,6 +13,9 @@ extern "C" {
 #endif
 
 
+#include "tan_core.h"
+
+
 int tan_pgconn_init();
 void tan_pgconn_free();
 
@@ -25,8 +28,8 @@ void tan_pgconn_free();
  *
  * @return The first field of the first row or an empty string.
  */
-const char *pg_query(const char *hostaddr,
-                     const char *query, ...);
+TAN_PUBLIC_API const char *pg_query(const char *hostaddr,
+                                    const char *query, ...);
 
 
 #ifdef __cplusplus

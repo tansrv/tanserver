@@ -1,16 +1,12 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
 #include "tan_epoll.h"
 #include "tan_events.h"
-#include "tan_user_api.h"
-#include "tan_postgresql.h"
 
 
 #define TAN_MASTER_PROCESS   "tansrv-master"
@@ -192,19 +188,13 @@ tan_worker_process_init()
     if (ret != TAN_OK)
         return ret;
 
-    ret = tan_add_listen_socket_to_epoll(server);
-    if (ret != TAN_OK)
-        return ret;
-
-    return tan_load_user_api();
+    return tan_add_listen_socket_to_epoll(server);
 }
 
 
 static void
 tan_worker_process_exit()
 {
-    tan_unload_user_api();
-
     if (tan_get_pg_cfg()->size)
         tan_pgconn_free();
 

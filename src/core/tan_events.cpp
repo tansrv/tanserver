@@ -1,15 +1,12 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
 #include "tan_epoll.h"
 #include "tan_events.h"
-#include "tan_user_api.h"
 
 
 static void tan_process_events_and_timers();
@@ -52,7 +49,7 @@ tan_process_events_and_timers()
 
     if (tan_unlikely(tan_start_reload())) {
 
-        if (tan_reload_user_api() != TAN_OK)
+        if (tan_py_re_import_user_api_module() != TAN_OK)
             exit(-1);
 
         tan_reload_end();

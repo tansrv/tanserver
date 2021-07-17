@@ -17,4 +17,3 @@ target_link_libraries(tanserver libcore.so libconfuse.so libjsoncpp.so python2.7
 
 install(FILES ../conf/tanserver.conf DESTINATION /etc)
 install(DIRECTORY user_api DESTINATION ${INSTALL_PATH})
-install(FILES ../misc/CMakeLists.txt DESTINATION ${INSTALL_PATH}/build)
