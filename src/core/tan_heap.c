@@ -200,8 +200,11 @@ tan_heap_remove_min(tan_heap_t *hh)
                 break;
             }
         }
-    }    
+    }
+
+    return out;
 }
+
 
 static int
 tan_heap_get_left_index(int i)
