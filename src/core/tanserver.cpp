@@ -50,11 +50,10 @@ main(int argc, char **argv)
     if (tan_create_pidfile() != TAN_OK)
         return -1;
 
-    if (tan_py_env_init() != TAN_OK)
-        return -1;
-
     if (tan_status_shm_init() != TAN_OK)
         return -1;
+
+    tan_py_env_init();
 
     tan_master_process_loop();
 

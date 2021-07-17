@@ -188,7 +188,11 @@ tan_worker_process_init()
     if (ret != TAN_OK)
         return ret;
 
-    return tan_add_listen_socket_to_epoll(server);
+    ret = tan_add_listen_socket_to_epoll(server);
+    if (ret != TAN_OK)
+        return ret;
+
+    return tan_user_api_init();
 }
 
 

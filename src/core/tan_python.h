@@ -19,12 +19,9 @@ extern "C" {
 
 
 /**
- * Initialize the Python interpreter and import
- * the "json" and "user_api" modules.
- *
- * @return TAN_OK || TAN_ERROR
+ * Initialize the Python interpreter and set sys.path.
  */
-tan_int_t tan_py_env_init();
+void tan_py_env_init();
 
 /**
  * Call json.loads() to convert a JSON string to PyObject.
@@ -35,21 +32,6 @@ tan_int_t tan_py_env_init();
  *         otherwise it will return PyObject *.
  */
 PyObject *tan_py_json_string_to_object(const char *json_string);
-
-/**
- * Call the specified Python function and pass a PyObject.
- *
- * @param func:   Python function name
- * @param object: The PyObject passed to the Python function
- *
- * @return If the function does not exist, it returns NULL,
- *         otherwise returns PyObject *.
- *
- * @note Call PyString_AsString(obj) to get the string.
- */
-PyObject *tan_py_call_function(const char *func, PyObject *object);
-
-tan_int_t tan_py_re_import_user_api_module();
 
 
 #ifdef __cplusplus

@@ -23,6 +23,7 @@
 #include "tan_list.h"
 #include "tan_heap.h"
 #include "tan_python.h"
+#include "tan_user_api.h"
 #include "tan_postgresql.h"
 #include "tan_protocol_errors.h"
 #include "tan_process_loop.h"

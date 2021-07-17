@@ -1,2 +1,2 @@
-def hello_word(json_obj):
+def hello_world(json_obj):
     return "hello, world!"
