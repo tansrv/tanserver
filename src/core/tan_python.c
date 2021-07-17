@@ -17,7 +17,7 @@ tan_py_env_init()
     Py_Initialize();
 
     PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.path.append('/usr/local/tanserver/lib/')");
+    PyRun_SimpleString("sys.path.append('/usr/local/tanserver/lib/')");
 }
 
 
