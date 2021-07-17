@@ -11,6 +11,8 @@
 #define TAN_OK      0
 #define TAN_ERROR  -1
 
+#define TAN_PUBLIC_API
+
 
 #include "tan_linux_conf.h"
 #include "config.h"
