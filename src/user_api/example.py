@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # docs: tanserver.org
 
 
@@ -61,8 +62,8 @@ def login_register(json_obj):
 
             # Send {"msg": "registration successful"}
             return json.dumps(data)
-        else:
-            return res
+
+        return res
     except:
         return 'Query failed'
 
@@ -94,4 +95,5 @@ def transaction(json_obj):
         # Send "OK"
         return 'OK'
     except:
+        pg_query('127.0.0.1', 'rollback')
         return 'Query failed'
