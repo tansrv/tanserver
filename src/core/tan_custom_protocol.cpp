@@ -61,7 +61,7 @@ tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
                                             const char *body)
 {
     const char    *func;
-    PyObject      *json_obj, *res, *repr;
+    PyObject      *json_obj, *res;
     const u_char  *p;
 
     p = tan_get_hostaddr(&conn->info.addr);
@@ -95,19 +95,10 @@ tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
         return TAN_ERROR;
     }
 
+    conn->event.packet = PyString_AsString(res);
+
     Py_DECREF(json_obj);
-
-    repr = PyObject_Repr(res);
-    if (repr == NULL) {
-
-        Py_DECREF(res);
-        return TAN_ERROR;
-    }
-
     Py_DECREF(res);
 
-    conn->event.packet = PyString_AsString(repr);
-
-    Py_DECREF(repr);
     return TAN_OK;
 }
