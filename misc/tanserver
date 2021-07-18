@@ -33,7 +33,6 @@ restart() {
 }
 
 reload() {
-  cd /usr/local/$NAME/build/ && cmake . >/dev/null && make && make install >/dev/null && \
   kill -SIGUSR2 $PID 2>/dev/null
 }
 

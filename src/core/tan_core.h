@@ -11,6 +11,8 @@
 #define TAN_OK      0
 #define TAN_ERROR  -1
 
+#define TAN_PUBLIC_API
+
 
 #include "tan_linux_conf.h"
 #include "config.h"
@@ -20,6 +22,10 @@
 #include "tan_config.h"
 #include "tan_list.h"
 #include "tan_heap.h"
+#include "tan_json.h"
+#include "tan_python.h"
+#include "tan_user_api.h"
+#include "tan_postgresql.h"
 #include "tan_protocol_errors.h"
 #include "tan_process_loop.h"
 #include "tan_syscfg.h"

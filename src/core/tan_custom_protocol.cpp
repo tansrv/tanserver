@@ -5,8 +5,8 @@
 
 
 #include "tan_core.h"
+#include "tan_python.h"
 #include "tan_jsoncpp.h"
-#include "tan_user_api.h"
 #include "tan_connection.h"
 #include "tan_custom_protocol.h"
 
@@ -60,28 +60,16 @@ tan_int_t
 tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
                                             const char *body)
 {
-    const u_char   *p;
-    const char     *func;
-    Json::Value     value;
-    tan_user_api_t  api;
+    const char    *func;
+    PyObject      *json_obj, *res, *repr;
+    const u_char  *p;
 
     p = tan_get_hostaddr(&conn->info.addr);
 
     func = conn->event.user_api.c_str();
 
-    api = tan_get_user_api_handler(func);
-    if (api == NULL) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
-                     func,
-                     p[0], p[1], p[2], p[3]);
-
-        return TAN_ERROR;
-    }
-
-    try {
-        value = json_decode(body);
-    } catch (...) {
+    json_obj = tan_py_json_string_to_object(body);
+    if (json_obj == NULL) {
 
         tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_INVALID_JSON_STRING,
                      func,
@@ -96,11 +84,30 @@ tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
      */
     tan_set_current_connection(conn);
 
-    try {
-        conn->event.packet = api(value);
-    } catch (...) {
+    res = tan_call_user_api(func, json_obj);
+    if (res == NULL) {
+
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
+                     func,
+                     p[0], p[1], p[2], p[3]);
+
+        Py_DECREF(json_obj);
         return TAN_ERROR;
     }
 
+    Py_DECREF(json_obj);
+
+    repr = PyObject_Repr(res);
+    if (repr == NULL) {
+
+        Py_DECREF(res);
+        return TAN_ERROR;
+    }
+
+    Py_DECREF(res);
+
+    conn->event.packet = PyString_AsString(repr);
+
+    Py_DECREF(repr);
     return TAN_OK;
 }

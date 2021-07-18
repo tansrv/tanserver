@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -10,19 +8,38 @@
 #define TAN_USER_API_H
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include "tan_core.h"
 
-#include <json.h>
-#include <string>
+
+/**
+ * Import 'user_api' module.
+ *
+ * @return TAN_OK || TAN_ERROR
+ */
+tan_int_t tan_user_api_init();
+
+/**
+ * Call the specified user API and pass it a JSON object.
+ *
+ * @param func:     The specified function name
+ * @param json_obj: The JSON object to be passed
+ *
+ * @return If the specified function does not exist, it
+ *         will return NULL, otherwise it will return PyObject *.
+ */
+PyObject *tan_call_user_api(const char *func, PyObject *json_obj);
+
+void tan_reload_user_api();
 
 
-typedef std::string (*tan_user_api_t)(const Json::Value &);
-
-
-tan_int_t tan_load_user_api();
-tan_user_api_t tan_get_user_api_handler(const char *func);
-tan_int_t tan_reload_user_api();
-void tan_unload_user_api();
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* TAN_USER_API_H */

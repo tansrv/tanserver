@@ -53,6 +53,8 @@ main(int argc, char **argv)
     if (tan_status_shm_init() != TAN_OK)
         return -1;
 
+    tan_py_env_init();
+
     tan_master_process_loop();
 
     return 0;

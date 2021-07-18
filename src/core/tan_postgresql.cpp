@@ -6,13 +6,14 @@
 
 #include "tan_core.h"
 #include "tan_events.h"
-#include "tan_postgresql.h"
 
 #if (TAN_HAVE_REDHAT_PG_HEADER)
 #include <libpq-fe.h>
 #else
 #include <postgresql/libpq-fe.h>
 #endif
+
+#include <string>
 
 
 #define TAN_MAX_PARAM_COUNT  128
@@ -33,12 +34,13 @@ static void tan_pg_conninfo_init(char *buf, tan_pg_cfg_t *cfg);
 static PGconn *tan_get_pgconn(const char *func, const char *hostaddr);
 static int tan_get_pgconn_index(const char *hostaddr);
 
-static std::string tan_pg_exec_params(const char *func, PGconn *conn,
-                                      const char *query, va_list arg);
+static tan_int_t tan_pg_exec_params(const char *func, PGconn *conn,
+                                    const char *query, va_list arg);
 static int tan_get_param_count(const char *query);
 static void tan_check_pgconn_status(PGconn *conn);
 
 
+static std::string          query_res;
 static tan_vector_pgconn_t  conns;
 
 
@@ -113,31 +115,33 @@ tan_pg_conninfo_init(char *buf, tan_pg_cfg_t *cfg)
 }
 
 
-std::string
+const char *
 pg_query(const char *hostaddr, const char *query, ...)
 {
-    PGconn      *conn;
     va_list      arg;
+    PGconn      *conn;
     const char  *func;
-    std::string  ret;
 
     /* Get the API name.  */
     func = tan_get_current_connection()->event.user_api.c_str();
 
     conn = tan_get_pgconn(func, hostaddr);
     if (conn == NULL)
-        throw "error";
+        return NULL;
 
     va_start(arg, query);
 
-    try {
-        ret = tan_pg_exec_params(func, conn, query, arg);
-    } catch (...) {
-        throw "error";
-    }
+    /*
+     * If it returns TAN_OK, it means query_res is set.
+     * Otherwise, NULL should be returned, so that Python
+     * gets 'None' and throws an exception to the user.
+     */
+    if (tan_pg_exec_params(func, conn, query, arg) != TAN_OK)
+        return NULL;
 
     va_end(arg);
-    return ret;
+
+    return query_res.c_str();
 }
 
 
@@ -174,15 +178,14 @@ tan_get_pgconn_index(const char *hostaddr)
 }
 
 
-static std::string
+static tan_int_t
 tan_pg_exec_params(const char *func, PGconn *conn,
                    const char *query, va_list arg)
 {
     int            k, param_count;
+    PGresult      *res;
     const char    *param_values[TAN_MAX_PARAM_COUNT];
     const u_char  *p;
-    PGresult      *res;
-    std::string    ret;
 
     param_count = tan_get_param_count(query);
     if (tan_unlikely(param_count > TAN_MAX_PARAM_COUNT)) {
@@ -190,7 +193,7 @@ tan_pg_exec_params(const char *func, PGconn *conn,
         tan_log_database_lf(func, "maximum number of parameters: %d",
                             TAN_MAX_PARAM_COUNT);
 
-        throw "error";
+        return TAN_ERROR;
     }
 
     for (k = 0; k < param_count; ++k)
@@ -213,19 +216,20 @@ tan_pg_exec_params(const char *func, PGconn *conn,
         tan_check_pgconn_status(conn);
 
         PQclear(res);
-        throw "error";
+        return TAN_ERROR;
     }
 
     if (!PQntuples(res)) {
-
         PQclear(res);
-        return "";
+
+        query_res = "";
+        return TAN_OK;
     }
 
-    ret = std::string(PQgetvalue(res, 0, 0));
+    query_res = std::string(PQgetvalue(res, 0, 0));
 
     PQclear(res);
-    return ret;
+    return TAN_OK;
 }
 
 

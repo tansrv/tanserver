@@ -280,7 +280,10 @@ tan_downheap(tan_heap_t *hh,
             }
         }
     }
+
+    return out;
 }
+
 
 static int
 tan_heap_get_left_index(int i)

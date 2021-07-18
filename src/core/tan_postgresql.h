@@ -8,10 +8,16 @@
 #define TAN_POSTGRESQL_H
 
 
-#include <string>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#include "tan_core.h"
 
 
 int tan_pgconn_init();
+void tan_pgconn_free();
 
 /**
  * Query database and get the first field of the first row.
@@ -22,9 +28,13 @@ int tan_pgconn_init();
  *
  * @return The first field of the first row or an empty string.
  */
-std::string pg_query(const char *hostaddr, const char *query, ...);
+TAN_PUBLIC_API const char *pg_query(const char *hostaddr,
+                                    const char *query, ...);
 
-void tan_pgconn_free();
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* TAN_POSTGRESQL_H */

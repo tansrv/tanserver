@@ -1,8 +1,6 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
@@ -31,21 +29,4 @@ json_decode(const std::string &json_string)
         throw "error";
 
     return value;
-}
-
-
-void
-json_append_status(std::string &json_string,
-                   int stat, const char *msg)
-{
-    char  buf[TAN_MAX_STR_SIZE];
-
-    tan_memzero(buf, TAN_MAX_STR_SIZE);
-
-    snprintf(buf, TAN_MAX_STR_SIZE,
-             "{\"status\":%d,\"message\":\"%s\",\"result\":",
-             stat, msg);
-
-    json_string.insert(0, buf);
-    json_string.append("}");
 }
