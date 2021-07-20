@@ -33,7 +33,7 @@ def append_status(json_obj):
     str = '{\"id\":0}'
 
     # Send {"status": 200, "message": "ok", "result": {"id": 0}}
-    return json_append_status(str, '200', 'ok')
+    return json_append_status(str, 200, 'ok')
 
 
 # API: login_register
@@ -72,7 +72,7 @@ def get_items(json_obj):
         res = pg_query('127.0.0.1',
                        'select array_to_json(array_agg(row_to_json(items))) from items')
 
-        return json_append_status(res, '0', 'OK')
+        return json_append_status(res, 0, 'OK')
     except:
         return 'Query failed'
 

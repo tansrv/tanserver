@@ -76,4 +76,4 @@ def json_append_status(json_string, status_code, message):
   ``return``: For example: {"status":200,"message":"OK","result":{$json_string}}
 
   """
-  return (core.json_append_status(json_string.encode(), status_code.encode(), message.encode())).decode()
+  return (core.json_append_status(json_string.encode(), (str(status_code)).encode(), message.encode())).decode()
