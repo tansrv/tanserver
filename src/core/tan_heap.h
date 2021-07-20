@@ -57,7 +57,7 @@ tan_heap_t *tan_heap_create();
 tan_int_t tan_heap_add_node(tan_heap_t *hh, time_t key, void *value);
 void *tan_heap_min_peek(tan_heap_t *hh);
 void *tan_heap_remove_min(tan_heap_t *hh);
-time_t tan_remove_node(tan_heap_t *hh, void* value);
+time_t tan_heap_remove_node(tan_heap_t *hh, void *value);
 void tan_heap_destory(tan_heap_t *hh);
 
 #if 0

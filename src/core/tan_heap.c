@@ -12,14 +12,17 @@
 #define TAN_HEAP_INIT_SIZE  20
 
 
-static tan_int_t tan_heap_create_node(tan_heap_t *hp, time_t key, void *value);
+static tan_int_t tan_heap_create_node(tan_heap_t *hp,
+                                      time_t key, void *value);
 static int tan_heap_get_parent_index(int i);
 static time_t tan_heap_get_key(tan_heap_node_t *n);
-static void* tan_heap_get_value(tan_heap_node_t *n);
+static void tan_downheap(tan_heap_t *hh, int index);
 static int tan_heap_get_left_index(int i);
 static int tan_heap_get_right_index(int i);
-static void tan_downheap(tan_heap_t *hh, int index);
-static int tan_findNodeByValue(tan_heap_t *hh, int index, void *value);
+static int tan_find_node_by_value(tan_heap_t *hh,
+                                  int index, void *value);
+static void *tan_heap_get_value(tan_heap_node_t *n);
+
 
 tan_heap_t *
 tan_heap_create()
@@ -47,6 +50,38 @@ tan_heap_create()
     hh->used = 0;
 
     return hh;
+}
+
+
+tan_int_t
+tan_heap_add_node(tan_heap_t *hh, time_t key, void *value)
+{
+    int               c, par;
+    tan_int_t         ret;
+    tan_heap_node_t  *tmp;
+
+    ret = tan_heap_create_node(hh, key, value);
+    if (ret != TAN_OK)
+        return ret;
+
+    /* upheap  */
+    c = hh->used - 1;
+    while (c > 0) {
+
+        par = tan_heap_get_parent_index(c);
+        if (tan_heap_get_key(hh->arr[c]) >= tan_heap_get_key(hh->arr[par]))
+            break;
+
+        /* swap  */
+        tmp = hh->arr[c];
+
+        hh->arr[c]   = hh->arr[par];
+        hh->arr[par] = tmp;
+
+        c = par;
+    }
+
+    return TAN_OK;
 }
 
 
@@ -93,45 +128,6 @@ tan_heap_create_node(tan_heap_t *hp, time_t key, void *value)
 }
 
 
-void *
-tan_heap_min_peek(tan_heap_t *hh)
-{
-    return hh->arr[0]->value;
-}
-
-
-tan_int_t
-tan_heap_add_node(tan_heap_t *hh, time_t key, void *value)
-{
-    int               c, par;
-    tan_int_t         ret;
-    tan_heap_node_t  *tmp;
-
-    ret = tan_heap_create_node(hh, key, value);
-    if (ret != TAN_OK)
-        return ret;
-
-    /* upheap  */
-    c = hh->used - 1;
-    while (c > 0) {
-
-        par = tan_heap_get_parent_index(c);
-        if (tan_heap_get_key(hh->arr[c]) >= tan_heap_get_key(hh->arr[par]))
-            break;
-
-        /* swap  */
-        tmp = hh->arr[c];
-
-        hh->arr[c]   = hh->arr[par];
-        hh->arr[par] = tmp;
-
-        c = par;
-    }
-
-    return TAN_OK;
-}
-
-
 static int
 tan_heap_get_parent_index(int i)
 {
@@ -145,19 +141,18 @@ tan_heap_get_key(tan_heap_node_t *n)
     return n->key;
 }
 
-static void* 
-tan_heap_get_value(tan_heap_node_t *n)
+
+void *
+tan_heap_min_peek(tan_heap_t *hh)
 {
-    return n->value;
+    return hh->arr[0]->value;
 }
 
 
 void *
 tan_heap_remove_min(tan_heap_t *hh)
 {
-    int               c, l, r;
-    void             *out;
-    tan_heap_node_t  *tmp;
+    void  *out;
 
     if (!hh->used)
         return NULL;
@@ -172,72 +167,17 @@ tan_heap_remove_min(tan_heap_t *hh)
     --hh->used;
 
     tan_downheap(hh, 0);
-
     return out;
 }
 
-static int
-tan_findNodeByValue(tan_heap_t *hh,
-                    int index,
-                    void *value)
-
-{
-    if(index >= hh->used)
-        return -1;
-
-    if(tan_heap_get_value(hh->arr[index]) == value)
-        return index;
-
-    int ret;
-
-    ret = tan_findNodeByValue(hh,
-                              tan_heap_get_left_index(index),
-                              value);
-
-    if(ret == -1)
-        ret = tan_findNodeByValue(hh,
-                                  tan_heap_get_right_index(index),
-                                  value);
-
-    return ret;
-}
-
-time_t 
-tan_remove_node(tan_heap_t *hh,
-                void* value)
-{
-    int    targetIndex;
-    time_t out;
-
-    targetIndex = tan_findNodeByValue(hh, 0, value);
-
-    if(targetIndex == -1){
-
-        return -1;
-    }
-
-    out = tan_heap_get_key(hh->arr[targetIndex]);
-    free(hh->arr[targetIndex]);
-
-    //swap rightmost leaf and target
-    hh->arr[targetIndex] = hh->arr[hh->used-1];
-    hh->arr[hh->used-1]  = NULL;
-    --hh->used;
-
-    tan_downheap(hh, targetIndex);
-
-    return out;
-}
 
 static void 
-tan_downheap(tan_heap_t *hh,
-             int index)
+tan_downheap(tan_heap_t *hh, int index)
 {
-    int              l, r;
+    int               l, r;
     tan_heap_node_t  *tmp;
 
-    while (index < hh->used) 
-    {
+    while (index < hh->used) {
 
         l = tan_heap_get_left_index(index);
         r = tan_heap_get_right_index(index);
@@ -246,8 +186,7 @@ tan_downheap(tan_heap_t *hh,
             hh->arr[l]->key < hh->arr[r]->key)
         {
             /* Left is smaller.  */
-            if (hh->arr[index]->key > hh->arr[l]->key) 
-            {
+            if (hh->arr[index]->key > hh->arr[l]->key) {
                 /* Swap arr[index] and left child.  */
                 tmp = hh->arr[index];
 
@@ -255,17 +194,12 @@ tan_downheap(tan_heap_t *hh,
                 hh->arr[l] = tmp;
 
                 index = l;
-            }
-            else 
-            {
+            } else {
                 break;
             }
-        } 
-        else
-        {
+        } else {
             /* Right is smaller.  */
-            if (r < hh->used && hh->arr[index]->key > hh->arr[r]->key)
-            {
+            if (r < hh->used && hh->arr[index]->key > hh->arr[r]->key) {
                 /* Swap arr[index] and right child.  */
                 tmp = hh->arr[index];
 
@@ -273,29 +207,81 @@ tan_downheap(tan_heap_t *hh,
                 hh->arr[r] = tmp;
 
                 index = r;
-            } 
-            else
-            {
+            } else {
                 break;
             }
         }
     }
-
-    return out;
 }
 
 
 static int
 tan_heap_get_left_index(int i)
 {
-    return (i<<1) + 1;
+    return (i << 1) + 1;
 }
 
 
 static int
 tan_heap_get_right_index(int i)
 {
-    return (i<<1) + 2;
+    return (i << 1) + 2;
+}
+
+
+time_t 
+tan_heap_remove_node(tan_heap_t *hh, void *value)
+{
+    int     target_index;
+    time_t  out;
+
+    target_index = tan_find_node_by_value(hh, 0, value);
+    if (target_index == -1)
+        return -1;
+
+    out = tan_heap_get_key(hh->arr[target_index]);
+    free(hh->arr[target_index]);
+
+    /* Swap rightmost leaf and target.  */
+    hh->arr[target_index] = hh->arr[hh->used - 1];
+    hh->arr[hh->used - 1] = NULL;
+
+    --hh->used;
+
+    tan_downheap(hh, target_index);
+    return out;
+}
+
+
+static int
+tan_find_node_by_value(tan_heap_t *hh, int index,
+                       void *value)
+{
+    int  ret;
+
+    if (index >= hh->used)
+        return -1;
+
+    if (tan_heap_get_value(hh->arr[index]) == value)
+        return index;
+
+    ret = tan_find_node_by_value(hh,
+        tan_heap_get_left_index(index), value);
+
+    if (ret == -1) {
+
+        ret = tan_find_node_by_value(hh,
+            tan_heap_get_right_index(index), value);
+    }
+
+    return ret;
+}
+
+
+static void * 
+tan_heap_get_value(tan_heap_node_t *n)
+{
+    return n->value;
 }
 
 

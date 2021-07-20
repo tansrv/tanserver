@@ -10,18 +10,18 @@ json._default_encoder.ensure_ascii  = False
 json._default_encoder.key_separator = ':'
 
 # shm_open()
-CDLL('librt.so', mode=RTLD_GLOBAL)
+CDLL('librt.so', mode = RTLD_GLOBAL)
 
 # PostgreSQL C Client
-CDLL('libpq.so', mode=RTLD_GLOBAL)
+CDLL('libpq.so', mode = RTLD_GLOBAL)
 
 # libconfuse
 CDLL('/usr/local/tanserver/lib/libconfuse.so',
-     mode=RTLD_GLOBAL)
+     mode = RTLD_GLOBAL)
 
 # JsonCpp
 CDLL('/usr/local/tanserver/lib/libjsoncpp.so',
-     mode=RTLD_GLOBAL)
+     mode = RTLD_GLOBAL)
 
 # Currently supports pg_query(), json_append_status()
 core = CDLL('/usr/local/tanserver/lib/libcore.so')
@@ -50,7 +50,6 @@ def pg_query(hostaddr, query, *args):
   (/var/log/tanserver/error.log).
 
   """
-
   args_encoded = ()
 
   for ele in args:
@@ -60,7 +59,7 @@ def pg_query(hostaddr, query, *args):
 
   # pg_query() returned NULL in C.
   if res == None:
-      raise Exception("Query failed.")
+    raise Exception("Query failed.")
 
   return res.decode()
 
