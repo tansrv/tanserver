@@ -10,7 +10,7 @@
 
 #include "tan_core.h"
 
-#include <python2.7/Python.h>
+#include <Python.h>
 
 
 #ifdef __cplusplus

@@ -34,7 +34,7 @@ restart() {
 }
 
 reload() {
-  find $USERAPI -name '*.py' | xargs python2 && \
+  find $USERAPI -name '*.py' | xargs python3 && \
   kill -SIGUSR2 $PID 2>/dev/null
 }
 

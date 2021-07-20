@@ -95,7 +95,7 @@ tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
         return TAN_ERROR;
     }
 
-    conn->event.packet = PyString_AsString(res);
+    conn->event.packet = PyUnicode_AsUTF8(res);
 
     Py_DECREF(json_obj);
     Py_DECREF(res);
