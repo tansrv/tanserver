@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # docs: tanserver.org
 
 
@@ -48,14 +47,14 @@ def login_register(json_obj):
     try:
         res = pg_query('127.0.0.1',
                        'select row_to_json(users) from users where id = $1 and password = $2',
-                       str(id), str(pwd))
+                       id, pwd)
 
         # If 'res' is an empty string, it means there is no such user.
         if res == '':
             # Complete registration.
             pg_query('127.0.0.1',
                      'insert into users values($1, $2, $3)',
-                     str(id), str(pwd), '16')
+                     id, pwd, '16')
 
             data = {}
             data['msg'] = 'registration successful'
