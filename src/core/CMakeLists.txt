@@ -23,7 +23,7 @@ set(INCLUDE /usr/local/include/tanserver)
 aux_source_directory(. SRCS)
 add_library(core SHARED ${SRCS})
 
-target_link_libraries(core ${PYTHON_LIBRARIES} pthread rt crypto ssl pq)
+target_link_libraries(core ${PYTHON_LIBRARIES} pthread rt crypto ssl)
 
 install(TARGETS core LIBRARY DESTINATION ${LIB})
 install(FILES ../../misc/tanserver PERMISSIONS OWNER_EXECUTE DESTINATION /etc/init.d)
