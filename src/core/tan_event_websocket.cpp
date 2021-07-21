@@ -75,6 +75,8 @@ static tan_int_t tan_get_custom_protocol_header(tan_connection_t *conn,
                                                 char *header,
                                                 const std::string &content);
 
+static void tan_ws_send_close_frame(tan_connection_t *conn);
+
 
 void
 tan_event_websocket(tan_connection_t *conn)
@@ -225,9 +227,21 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    /* opcode should be 0x1 (text).  */
-    if (tan_unlikely(buf[0] != 0x81))
+    switch (buf[0]) {
+
+    case 0x81:
+
+        break;
+
+    case 0x88:
+
+        if (conn->status.flags & TAN_CONN_STATUS_CLOSING)
+            tan_ws_send_close_frame(conn);
+
+    default:
+
         goto out_disconnect;
+    }
 
     len = TAN_WS_GET_PAYLOAD_LEN_7(buf[1]);
 
@@ -443,11 +457,11 @@ tan_event_ws_recv_raw_data(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    conn->event.packet = tan_ws_make_packet(conn->event.packet.c_str());
+    conn->event.packet = tan_ws_make_frame(conn->event.packet.c_str());
 
     tan_connection_send_packet(conn);
 
-    conn->event.read    = tan_event_close;
+    conn->event.read    = tan_event_ws_recv_2_bytes;
     conn->status.flags |= TAN_CONN_STATUS_CLOSING;
 
     return;
@@ -496,4 +510,16 @@ tan_get_custom_protocol_header(tan_connection_t *conn,
 
     memcpy(header, content.c_str(), index);
     return TAN_OK;
+}
+
+
+static void
+tan_ws_send_close_frame(tan_connection_t *conn)
+{
+    std::string  close_frame;
+
+    close_frame = tan_ws_make_close_frame();
+
+    tan_ssl_write(conn->info.ssl,
+                  close_frame.c_str(), close_frame.length());
 }

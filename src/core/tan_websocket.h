@@ -10,7 +10,7 @@
 
 #include "tan_core.h"
 
-#include <iostream>
+#include <string>
 
 
 #define TAN_WEBSOCKET_RESPONSE_HEADER  "HTTP/1.1 101 Switching Protocols\r\n"  \
@@ -34,9 +34,16 @@ char *tan_generate_sec_websocket_accept(const char *sec_websocket_key);
  *
  * @param buf: Data to be framed
  *
- * @return A WebSocket frame
+ * @return A WebSocket frame.
  */
-std::string tan_ws_make_packet(const char *buf);
+std::string tan_ws_make_frame(const char *buf);
+
+/**
+ * Generate a WebSocket close frame.
+ *
+ * @return A WebSocket frame with a status code of 1000 (Normal Closure).
+ */
+std::string tan_ws_make_close_frame();
 
 
 #endif /* TAN_WEBSOCKET_H */

@@ -8,7 +8,8 @@
 #include "tan_websocket.h"
 
 
-#define TAN_WEBSOCKET_GUID  "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+#define TAN_WS_GUID            "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+#define TAN_WS_NORMAL_CLOSURE  1000
 
 
 char *
@@ -19,7 +20,7 @@ tan_generate_sec_websocket_accept(const char *sec_websocket_key)
     tan_memzero(buf, TAN_MAX_STR_SIZE);
 
     snprintf(buf, TAN_MAX_STR_SIZE, "%s%s",
-             sec_websocket_key, TAN_WEBSOCKET_GUID);
+             sec_websocket_key, TAN_WS_GUID);
 
     tan_memzero(sha1_res, TAN_SHA1_LENGTH + 1);
 
@@ -31,11 +32,11 @@ tan_generate_sec_websocket_accept(const char *sec_websocket_key)
 
 
 std::string
-tan_ws_make_packet(const char *buf)
+tan_ws_make_frame(const char *buf)
 {
     int          len;
     char         header[11];
-    std::string  packet;
+    std::string  frame;
 
     tan_memzero(header, 11);
 
@@ -66,8 +67,27 @@ tan_ws_make_packet(const char *buf)
         header[9] = len & 0xff;
     }
 
-    packet.append(header);
-    packet.append(buf);
+    frame.append(header);
+    frame.append(buf);
 
-    return packet;
+    return frame;
+}
+
+
+std::string
+tan_ws_make_close_frame()
+{
+    char  frame[5];
+
+    frame[0] = 0x88;
+
+    /* Status code: 2 bytes  */
+    frame[1] = 2;
+
+    frame[2] = TAN_WS_NORMAL_CLOSURE >> 8 & 0xff;
+    frame[3] = TAN_WS_NORMAL_CLOSURE & 0xff;
+
+    /* end  */
+    frame[4] = '\0';
+    return frame;
 }
