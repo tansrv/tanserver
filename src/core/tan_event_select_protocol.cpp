@@ -5,9 +5,8 @@
 
 
 #include "tan_core.h"
-#include "tan_events.h"
-#include "tan_connection.h"
 #include "tan_openssl_ssl.h"
+#include "tan_events.h"
 
 
 static void tan_select_protocol(tan_connection_t *conn);

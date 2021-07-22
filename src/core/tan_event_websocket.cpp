@@ -5,12 +5,11 @@
 
 
 #include "tan_core.h"
-#include "tan_events.h"
 #include "tan_http.h"
-#include "tan_connection.h"
 #include "tan_openssl_ssl.h"
 #include "tan_websocket.h"
 #include "tan_custom_protocol.h"
+#include "tan_events.h"
 
 
 /* length <= 125  */
@@ -34,7 +33,7 @@ typedef enum {
 } tan_ws_read_header_status_e;
 
 
-/* Websocket handshake.  */
+/* WebSocket handshake  */
 static int tan_ws_recv_header(tan_connection_t *conn);
 static tan_int_t tan_ws_handshake(tan_connection_t *conn);
 static void tan_ws_make_response_header(char *buf,
@@ -64,6 +63,8 @@ static void tan_ws_make_response_header(char *buf,
  *   +---------------------------------------------------------------+
  */
 static void tan_event_ws_recv_2_bytes(tan_connection_t *conn);
+static tan_int_t tan_ws_check_opcode(tan_connection_t *conn,
+                                     unsigned char *p);
 static void tan_event_ws_payload_len_larger_125_bytes(tan_connection_t *conn);
 static void tan_event_ws_payload_len_larger_65535_bytes(tan_connection_t *conn);
 static void tan_event_ws_recv_mask(tan_connection_t *conn);
@@ -101,6 +102,10 @@ tan_event_websocket(tan_connection_t *conn)
         goto out_disconnect;
     }
 
+    /*
+     * Start WebSocket handshake:
+     * send response header (conn->event.ws_response_header) to the client.
+     */
     if (tan_ws_handshake(conn) != TAN_OK)
         goto out_disconnect;
 
@@ -114,10 +119,18 @@ out_disconnect:
 }
 
 
+/**
+ * Receive WebSocket request header and store it in conn->event.header.
+ *
+ * @return TAN_WS_READ_HEADER_CONTINUE ||
+ *         TAN_WS_READ_HEADER_FAILED   ||
+ *         TAN_WS_READ_HEADER_DONE
+ */
 static int
 tan_ws_recv_header(tan_connection_t *conn)
 {
-    tan_ssl_t  ret;
+    tan_ssl_t      ret;
+    const u_char  *p;
 
     for (;;) {
 
@@ -132,6 +145,14 @@ tan_ws_recv_header(tan_connection_t *conn)
         case TAN_SSL_READLINE_DONE:
 
             break;
+
+        /* Header length > 2048  */
+        case TAN_SSL_READLINE_TOO_LARGE:
+
+            p = tan_get_hostaddr(&conn->info.addr);
+
+            tan_log_info(TAN_WEBSOCKET_ERROR_REQUEST_HEADER_TOO_LARGE,
+                         p[0], p[1], p[2], p[3]);
 
         case TAN_SSL_READLINE_FAILED:
 
@@ -181,6 +202,10 @@ tan_ws_handshake(tan_connection_t *conn)
                       conn->event.ws_response_header.length())
         == TAN_SSL_CONTINUE)
     {
+        /*
+         * Failed to send. We need to continue to call
+         * tan_ssl_write() to send the response header.
+         */
         conn->status.flags |= TAN_CONN_STATUS_WS_HANDSHAKING;
     }
 
@@ -227,21 +252,8 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
         goto out_disconnect;
     }
 
-    switch (buf[0]) {
-
-    case 0x81:
-
-        break;
-
-    case 0x88:
-
-        if (conn->status.flags & TAN_CONN_STATUS_CLOSING)
-            tan_ws_send_close_frame(conn);
-
-    default:
-
+    if (tan_ws_check_opcode(conn, &buf[0]) != TAN_OK)
         goto out_disconnect;
-    }
 
     len = TAN_WS_GET_PAYLOAD_LEN_7(buf[1]);
 
@@ -264,6 +276,33 @@ tan_event_ws_recv_2_bytes(tan_connection_t *conn)
 out_disconnect:
 
     tan_free_client_connection(conn);
+}
+
+
+static tan_int_t
+tan_ws_check_opcode(tan_connection_t *conn,
+                    unsigned char *p)
+{
+    switch (*p) {
+
+    case 0x81:
+
+        if (conn->status.flags & TAN_CONN_STATUS_CLOSING)
+            return TAN_ERROR;
+
+        break;
+
+    case 0x88:
+
+        if (conn->status.flags & TAN_CONN_STATUS_CLOSING)
+            tan_ws_send_close_frame(conn);
+
+    default:
+
+        return TAN_ERROR;
+    }
+
+    return TAN_OK;
 }
 
 
@@ -461,6 +500,7 @@ tan_event_ws_recv_raw_data(tan_connection_t *conn)
 
     tan_connection_send_packet(conn);
 
+    /* Waiting to receive the close frame.  */
     conn->event.read    = tan_event_ws_recv_2_bytes;
     conn->status.flags |= TAN_CONN_STATUS_CLOSING;
 

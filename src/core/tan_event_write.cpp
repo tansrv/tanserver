@@ -6,7 +6,6 @@
 
 #include "tan_core.h"
 #include "tan_events.h"
-#include "tan_connection.h"
 
 
 static void tan_ws_handshake_continue(tan_connection_t *conn);

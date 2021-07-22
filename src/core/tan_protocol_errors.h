@@ -29,6 +29,11 @@
         "request header too large"                          \
     TAN_CLIENT_HOSTADDR
 
+#define TAN_WEBSOCKET_ERROR_REQUEST_HEADER_TOO_LARGE        \
+    TAN_WEBSOCKET_ERROR                                     \
+        "request header too large"                          \
+    TAN_CLIENT_HOSTADDR
+
 #define TAN_WEBSOCKET_ERROR_SEC_WEBSOCKET_KEY_NOT_FOUND     \
     TAN_WEBSOCKET_ERROR                                     \
         "\"Sec-WebSocket-Key\" not found"                   \

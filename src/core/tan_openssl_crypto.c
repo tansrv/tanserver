@@ -5,6 +5,7 @@
 
 
 #include "tan_core.h"
+#include "tan_openssl_crypto.h"
 
 #include <openssl/sha.h>
 #include <openssl/evp.h>

@@ -22,7 +22,7 @@ tan_event_loop(tan_socket_t server)
     while (!tan_is_stop())
         tan_process_events_and_timers();
 
-    /* Close listen socket.  */
+    /* close listen socket  */
     tan_close_socket(server);
 
     /*

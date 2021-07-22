@@ -5,6 +5,7 @@
 
 
 #include "tan_core.h"
+#include "tan_config.h"
 
 #include <confuse.h>
 

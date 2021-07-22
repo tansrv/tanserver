@@ -84,12 +84,8 @@ tan_parse_custom_protocol_body_and_call_api(tan_connection_t *conn,
      */
     tan_set_current_connection(conn);
 
-    res = tan_call_user_api(func, json_obj);
+    res = tan_call_user_api(func, json_obj, p);
     if (res == NULL) {
-
-        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
-                     func,
-                     p[0], p[1], p[2], p[3]);
 
         Py_DECREF(json_obj);
         return TAN_ERROR;

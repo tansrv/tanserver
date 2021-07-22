@@ -28,11 +28,14 @@ tan_int_t tan_user_api_init();
  *
  * @param func:     The specified function name
  * @param json_obj: The JSON object to be passed
+ * @param addr:     Hostaddr
  *
- * @return If the specified function does not exist, it
- *         will return NULL, otherwise it will return PyObject *.
+ * @return PyObject * || NULL
+ * 
+ * @note PyUnicode_AsUTF8() should be called to convert it to a string.
  */
-PyObject *tan_call_user_api(const char *func, PyObject *json_obj);
+PyObject *tan_call_user_api(const char *func, PyObject *json_obj,
+                            const u_char *addr);
 
 void tan_reload_user_api();
 

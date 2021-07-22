@@ -23,12 +23,12 @@ void tan_sha1_encode(const unsigned char *in, size_t n,
                      unsigned char *out);
 
 /**
- * Caller is responsible for freeing the returned buffer.
- *
  * @param buf: Data to be encoded
  * @param len: Length of the data to be encoded
  *
  * @return Base64 string
+ *
+ * @note Caller is responsible for freeing the returned buffer.
  */
 char *tan_base64_encode(const char *buf, int len);
 

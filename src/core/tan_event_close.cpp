@@ -4,8 +4,8 @@
  */
 
 
+#include "tan_core.h"
 #include "tan_events.h"
-#include "tan_connection.h"
 
 
 void

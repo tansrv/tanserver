@@ -6,6 +6,7 @@
 
 #include "tan_core.h"
 #include "tan_openssl_ssl.h"
+#include "tan_log_shipper.h"
 
 
 #define TAN_FILENAME_SIZE  50

@@ -7,6 +7,7 @@
 #include "tan_core.h"
 #include "tan_epoll.h"
 #include "tan_events.h"
+#include "tan_process_loop.h"
 
 
 #define TAN_MASTER_PROCESS   "tansrv-master"

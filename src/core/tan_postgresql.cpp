@@ -5,7 +5,8 @@
 
 
 #include "tan_core.h"
-#include "tan_events.h"
+#include "tan_connection.h"
+#include "tan_postgresql.h"
 
 #if (TAN_HAVE_REDHAT_PG_HEADER)
 #include <libpq-fe.h>

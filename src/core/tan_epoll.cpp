@@ -5,8 +5,8 @@
 
 
 #include "tan_core.h"
-#include "tan_epoll.h"
 #include "tan_events.h"
+#include "tan_epoll.h"
 
 
 #define TAN_MAXEVENTS  1024

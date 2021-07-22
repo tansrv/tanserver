@@ -1,18 +1,11 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #ifndef TAN_STRING_H
 #define TAN_STRING_H
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 
 #include "tan_core.h"
@@ -26,11 +19,6 @@ tan_vector_t(string, char *);
 
 
 #define tan_memzero(buf, n)  memset(buf, 0, n);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif /* TAN_STRING_H */

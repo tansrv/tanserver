@@ -5,9 +5,8 @@
 
 
 #include "tan_core.h"
-#include "tan_events.h"
-#include "tan_connection.h"
 #include "tan_custom_protocol.h"
+#include "tan_events.h"
 
 
 static void tan_event_recv_json(tan_connection_t *conn);

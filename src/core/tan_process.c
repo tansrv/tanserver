@@ -1,12 +1,11 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
+#include "tan_process.h"
 
 
 #define TAN_PIDFILE   "/var/run/tanserver.pid"

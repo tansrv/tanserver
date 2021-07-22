@@ -1,12 +1,11 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
+#include "tan_log.h"
 
 
 #define TAN_ERROR_LOG   "error.log"

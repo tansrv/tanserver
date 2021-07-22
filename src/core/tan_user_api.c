@@ -46,7 +46,8 @@ tan_user_api_merge_py_file()
 
 
 PyObject *
-tan_call_user_api(const char *func, PyObject *json_obj)
+tan_call_user_api(const char *func, PyObject *json_obj,
+                  const u_char *addr)
 {
     int        reload;
     PyObject  *arg, *tmp, *py_func, *res;
@@ -54,7 +55,7 @@ tan_call_user_api(const char *func, PyObject *json_obj)
     arg = Py_BuildValue("(O)", json_obj);
     if (arg == NULL) {
 
-        tan_log_crit(0, "Py_BuildValue(\"(O)\") failed", NULL);
+        tan_log_info("Py_BuildValue(\"(O)\") failed", NULL);
         return NULL;
     }
 
@@ -64,7 +65,7 @@ tan_call_user_api(const char *func, PyObject *json_obj)
     user_api_module = PyImport_ReloadModule(user_api_module);
     if (user_api_module == NULL) {
 
-        tan_log_crit(0, "PyImport_ReloadModule(\"%s\") failed",
+        tan_log_info("PyImport_ReloadModule(\"%s\") failed",
                      TAN_USER_API_MODULE);
 
         reload          = 0;
@@ -77,11 +78,17 @@ tan_call_user_api(const char *func, PyObject *json_obj)
     py_func = PyObject_GetAttrString(user_api_module, func);
     if (py_func == NULL) {
 
+        tan_log_info(TAN_CUSTOM_PROTOCOL_ERROR_FUNCTION_NOT_FOUND,
+                     func,
+                     addr[0], addr[1], addr[2], addr[3]);
+
         Py_DECREF(arg);
         return NULL;
     }
 
     res = PyObject_CallObject(py_func, arg);
+    if (res == NULL)
+        tan_log_info("PyObject_CallObject(\"%s\") failed", func);
 
     Py_DECREF(arg);
     Py_DECREF(py_func);

@@ -1,12 +1,11 @@
 /*
  * Copyright (C) tanserver.org
  * Copyright (C) Chen Daye
- *
- * Feedback: tanserver@outlook.com
  */
 
 
 #include "tan_core.h"
+#include "tan_signal.h"
 
 
 static void tan_signal_handler(int signo, siginfo_t *info, void *ctx);

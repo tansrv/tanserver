@@ -4,9 +4,9 @@
  */
 
 
-#include "tanserver.h"
 #include "tan_core.h"
 #include "tan_openssl_ssl.h"
+#include "tanserver.h"
 
 
 #define TAN_INFO_HEADER      \
