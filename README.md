@@ -32,11 +32,13 @@ You can apply Tanserver to your `Android` / `iOS` / `desktop` / `web` apps.
 
 ## Connector
 
-1. [Java](https://github.com/tansrv/tanserver-connector-java)
+You need a connector to connect your client app to tanserver, currently `Java`, `Javascript` and `Swift` clients are supported. (`Dart` / `C++` will be supported in the future.)
 
-2. [Swift](https://github.com/tansrv/tanserver-connector-swift)
+1. [Java](https://github.com/tansrv/tanserver-connectors/tree/main/java)
 
-Currently `Java` and `Swift` clients are supported. (`Dart` / `C++` will be supported in the future.)
+2. [Swift](https://github.com/tansrv/tanserver-connectors/tree/main/swift)
+
+3. [Javascript](https://github.com/tansrv/tanserver-connectors/tree/main/javascript)
 
 ## Example
 
