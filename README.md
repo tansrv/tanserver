@@ -10,11 +10,12 @@
 
 # Tanserver
 
-Tanserver is a server framework built for APIs.
+Tanserver is a free and open source server framework built for APIs.
+It allows you to write server-side APIs (in Python or C++) that will be used from the client, so you can handle a stable and secure client-server comunication.
 
-It receives JSON string from the client and returns JSON string after querying the database.
+Tanserver use a custom protocol that increase server performance and supports integration with [PostgreSQL](https://www.postgresql.org/).
 
-You can apply Tanserver to your `Android` / `iOS` / `desktop` apps.
+You can apply Tanserver to your `Android` / `iOS` / `desktop` / `web` apps.
 
 ## Documentation
 
