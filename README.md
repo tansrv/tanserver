@@ -11,7 +11,7 @@
 # Tanserver
 
 Tanserver is a free and open source server framework built for APIs.
-It allows you to write server-side APIs (in Python or C++) that will be used from the client, so you can handle a stable and secure client-server comunication.
+It allows you to write server-side APIs (in Python) that will be used from the client, so you can handle a stable and secure client-server comunication.
 
 Tanserver supports integration with [PostgreSQL](https://www.postgresql.org/) and it use a custom protocol that increase server performance.
 
@@ -52,21 +52,17 @@ Convert items table data into JSON string and send it to the client.
 | 0    | book     | 5     |
 | 1    | keyboard | 200   |
 
-```cpp
-string
-get_items(const Json::Value &value_recvd)
-{
-    try {
-        string  json_string = pg_query("8.8.8.8", /* Your PostgreSQL server IP address  */
-                                       "select array_to_json(array_agg(row_to_json(items))) from items;",
-                                       NULL);
+```python
+from tanserver import *
 
-        json_append_status(json_string, 0, "OK");
-        return json_string;
-    } catch (...) {
-        throw "error";
-    }
-}
+def get_items(json_obj):
+    try:
+        res = pg_query('127.0.0.1', # Your PostgreSQL server IP address
+                       'select array_to_json(array_agg(row_to_json(items))) from items')
+
+        return json_append_status(res, 0, 'OK')
+    except:
+        return 'Query failed'
 ```
 
 When the client calls `getJSON("get_items", "{}")`:
