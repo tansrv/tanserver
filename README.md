@@ -18,6 +18,11 @@ With this framework you can build a stable, secure and customizable client-serve
 * [Install Tanserver](https://tanserver.org/en/install/)
 * [Tanserver documentation](https://www.tanserver.org)
 
+## How it works
+Tanserver receives requests as JSON string from the client using a custom protocol that improves response time. 
+JSON string is composed by an header that contains API name and a body that contains parameters passed to API.
+After completing the computation and eventually querying the database, Tanserver sends a response to the client as JSON data.
+
 ## Features
 
 - **Security** ：Encrypted based on SSL protocol.
