@@ -41,7 +41,7 @@ You need a connector to connect your client app to tanserver, currently `Java`, 
 
 3. [Javascript](https://github.com/tansrv/tanserver-connectors/tree/main/javascript)
 
-## Example
+## API example
 
 API: `get_items`
 
