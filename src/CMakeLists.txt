@@ -16,4 +16,4 @@ add_executable(tanserver build/null.c)
 target_link_libraries(tanserver libcore.so libconfuse.so libjsoncpp.so pq)
 
 install(FILES ../conf/tanserver.conf DESTINATION /etc)
-install(DIRECTORY user_api DESTINATION ${INSTALL_PATH})
+install(DIRECTORY DESTINATION ${INSTALL_PATH}/user_api)
