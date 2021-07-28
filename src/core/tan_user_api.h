@@ -21,7 +21,7 @@ extern "C" {
  *
  * @return TAN_OK || TAN_ERROR
  */
-tan_int_t tan_user_api_init();
+tan_int_t tan_load_user_api_module();
 
 /**
  * Call the specified user API and pass it a JSON object.
@@ -37,7 +37,8 @@ tan_int_t tan_user_api_init();
 PyObject *tan_call_user_api(const char *func, PyObject *json_obj,
                             const u_char *addr);
 
-void tan_reload_user_api();
+void tan_reload_user_api_module();
+void tan_remove_user_api_module();
 
 
 #ifdef __cplusplus

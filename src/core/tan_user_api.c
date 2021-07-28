@@ -8,27 +8,34 @@
 #include "tan_user_api.h"
 
 
-#define TAN_USER_API_MODULE  "user_api"
-
-
-static void tan_user_api_merge_py_file();
+static tan_int_t tan_user_api_merge_py_file();
+static void tan_get_user_api_module_name(char *buf);
 
 
 static PyObject  *user_api_module;
 
 
 tan_int_t
-tan_user_api_init()
+tan_load_user_api_module()
 {
-    tan_user_api_merge_py_file();
+    char       module_name[TAN_MAX_STR_SIZE];
+    tan_int_t  ret;
 
-    user_api_module = PyImport_ImportModule(TAN_USER_API_MODULE);
+    ret = tan_user_api_merge_py_file();
+    if (ret != TAN_OK)
+        return ret;
+
+    tan_memzero(module_name, TAN_MAX_STR_SIZE);
+    tan_get_user_api_module_name(module_name);
+
+    user_api_module = PyImport_ImportModule(module_name);
     if (user_api_module == NULL) {
         PyErr_Print();
 
         tan_stderr_error(0, "PyImport_ImportModule(\"%s\") failed",
-                         TAN_USER_API_MODULE);
+                         module_name);
 
+        tan_remove_user_api_module();
         return TAN_ERROR;
     }
 
@@ -36,12 +43,31 @@ tan_user_api_init()
 }
 
 
-static void
+static tan_int_t
 tan_user_api_merge_py_file()
 {
-    system("find /usr/local/tanserver/user_api/ -name '*.py' | "
-           "xargs paste -s -d '\n' > "
-           "/usr/local/tanserver/lib/user_api.py");
+    char  buf[TAN_MAX_STR_SIZE];
+
+    tan_memzero(buf, TAN_MAX_STR_SIZE);
+
+    snprintf(buf, TAN_MAX_STR_SIZE,
+             "find /usr/local/tanserver/user_api/ -name '*.py' | "
+             "xargs paste -s -d '\n' > "
+             "/usr/local/tanserver/lib/user_api_%d.py",
+             getpid());
+
+    if (system(buf) != -1)
+        return TAN_OK;
+
+    tan_log_crit(errno, "system(\"%s\") failed", buf);
+    return TAN_ERROR;
+}
+
+
+static void
+tan_get_user_api_module_name(char *buf)
+{
+    snprintf(buf, TAN_MAX_STR_SIZE, "user_api_%d", getpid());
 }
 
 
@@ -55,7 +81,7 @@ tan_call_user_api(const char *func, PyObject *json_obj,
     arg = Py_BuildValue("(O)", json_obj);
     if (arg == NULL) {
 
-        tan_log_info("Py_BuildValue(\"(O)\") failed", NULL);
+        tan_log_crit(0, "Py_BuildValue(\"(O)\") failed", NULL);
         return NULL;
     }
 
@@ -64,9 +90,7 @@ tan_call_user_api(const char *func, PyObject *json_obj,
 
     user_api_module = PyImport_ReloadModule(user_api_module);
     if (user_api_module == NULL) {
-
-        tan_log_info("PyImport_ReloadModule(\"%s\") failed",
-                     TAN_USER_API_MODULE);
+        tan_log_info("PyImport_ReloadModule(\"user_api\") failed", NULL);
 
         reload          = 0;
         user_api_module = tmp;
@@ -88,7 +112,7 @@ tan_call_user_api(const char *func, PyObject *json_obj,
 
     res = PyObject_CallObject(py_func, arg);
     if (res == NULL)
-        tan_log_info("PyObject_CallObject(\"%s\") failed", func);
+        tan_log_warn(0, "PyObject_CallObject(\"%s\") failed", func);
 
     Py_DECREF(arg);
     Py_DECREF(py_func);
@@ -98,7 +122,23 @@ tan_call_user_api(const char *func, PyObject *json_obj,
 
 
 void
-tan_reload_user_api()
+tan_reload_user_api_module()
 {
     tan_user_api_merge_py_file();
+}
+
+
+void
+tan_remove_user_api_module()
+{
+    char  buf[TAN_MAX_STR_SIZE];
+
+    tan_memzero(buf, TAN_MAX_STR_SIZE);
+
+    snprintf(buf, TAN_MAX_STR_SIZE,
+             "/usr/local/tanserver/lib/user_api_%d.py",
+             getpid());
+
+    if (remove(buf))
+        tan_log_warn(errno, "remove(\"%s\") failed", buf);
 }

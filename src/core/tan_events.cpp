@@ -49,7 +49,7 @@ tan_process_events_and_timers()
 
     if (tan_unlikely(tan_start_reload())) {
 
-        tan_reload_user_api();
+        tan_reload_user_api_module();
 
         tan_reload_end();
     }

@@ -193,13 +193,15 @@ tan_worker_process_init()
     if (ret != TAN_OK)
         return ret;
 
-    return tan_user_api_init();
+    return tan_load_user_api_module();
 }
 
 
 static void
 tan_worker_process_exit()
 {
+    tan_remove_user_api_module();
+
     if (tan_get_pg_cfg()->size)
         tan_pgconn_free();
 
