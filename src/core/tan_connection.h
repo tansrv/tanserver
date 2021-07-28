@@ -15,7 +15,7 @@
 #include <memory>
 
 
-/* Some connection status flags, more will be added in future versions.  */
+/* Connection status flags.  */
 #define TAN_CONN_STATUS_SSL_HANDSHAKING  1
 #define TAN_CONN_STATUS_WS_HANDSHAKING   2
 #define TAN_CONN_STATUS_WRITE_PENDING    4
