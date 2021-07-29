@@ -1,4 +1,4 @@
-# ![Citus Banner](banner.jpg)
+# ![Tanserver Banner](banner.jpg)
 
 ![license](https://img.shields.io/badge/license-BSD-blue) [![docs](https://img.shields.io/badge/docs-latest-blueviolet)](https://tanserver.org) ![license](https://img.shields.io/badge/version-2.0.0-brightgreen
 )
