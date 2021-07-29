@@ -1,12 +1,7 @@
-<div align=center>
-    <img src="tanserver.png">
-</div>
+# ![Citus Banner](banner.jpg)
 
-<div align=center>
-    <img src="https://img.shields.io/badge/os-linux-orange">
-    <img src="https://img.shields.io/badge/license-BSD-blue">
-    <img src="https://img.shields.io/badge/docs-latest-brightgreen">
-</div>
+![license](https://img.shields.io/badge/license-BSD-blue) [![docs](https://img.shields.io/badge/docs-latest-blueviolet)](https://tanserver.org) ![license](https://img.shields.io/badge/version-2.0.0-brightgreen
+)
 
 # Tanserver
 
