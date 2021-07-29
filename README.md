@@ -3,8 +3,6 @@
 ![license](https://img.shields.io/badge/license-BSD-blue) [![docs](https://img.shields.io/badge/docs-latest-blueviolet)](https://tanserver.org) ![license](https://img.shields.io/badge/version-2.0.0-brightgreen
 )
 
-# Tanserver
-
 Tanserver is a high performance Linux server framework that allows you to easily and efficiently develop server APIs in python for `Android` / `iOS` / `desktop` / `web` apps.  
 With this framework you can build a stable, secure and customizable client-server communication and also manage data thanks to [PostgreSQL](https://www.postgresql.org/) integration.
 
