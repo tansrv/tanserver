@@ -1,0 +1,7 @@
+tanserver 2.0.0 - 2021/7/31
+
+  *) Feature: Now supports WebSocket.
+
+  *) Change: Use Python instead of C++ to write user APIs.
+  *) Change: Use min heap instead of linked list to implement timer.
+  *) Change: The option "client_max_json_size" is changed to "client_max_body_size".
