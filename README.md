@@ -6,6 +6,12 @@
 Tanserver is a high performance Linux server framework that allows you to easily and efficiently develop server APIs in python for `Android` / `iOS` / `desktop` / `web` apps.  
 With this framework you can build a stable, secure and customizable client-server communication and also manage data thanks to [PostgreSQL](https://www.postgresql.org/) integration.
 
+- [Documentation](#documentation)
+- [How it works](#how-it-works)
+- [Features](#features)
+- [Client connectors](#client-connectors)
+- [API example](#api-example)
+
 ## Documentation
 
 * [Install Tanserver](https://tanserver.org/en/install/)
@@ -63,6 +69,4 @@ When the client calls `getJSON("get_items", "{}")`:
 
 ![get_items](get_items.gif)
 
----
-
-Copyright (C) tanserver.org
+**You can find more examples here: https://tanserver.org/en/examples/**
