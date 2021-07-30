@@ -18,21 +18,21 @@ After completing the computation and eventually querying the database, Tanserver
 
 ## Features
 
-- **Security** ：Encrypted based on SSL protocol.
+- **Security** : Encrypted based on SSL / TLS protocol. The security is the same as HTTPS.
 
-- **Hot reload** ：Help you quickly add APIs or fix bugs.
+- **Hot reload** : Even in a production environment, users can add APIs or fix bugs in existing APIs.
 
-- **Log shipping** ：Support log shipping.
+- **Log shipping** : Built-in log shipping server, which allows users to download log files from multiple servers in real time.
 
 ## Client connectors
 
 You need a connector to connect your client app to tanserver, currently `Java`, `Javascript` and `Swift` clients are supported. (`Dart` / `C++` will be supported soon.)
 
-1. [Java](https://github.com/tansrv/tanserver-connectors/tree/main/java)
+- [Java](https://github.com/tansrv/tanserver-connectors/tree/main/java)
 
-2. [Swift](https://github.com/tansrv/tanserver-connectors/tree/main/swift)
+- [Swift](https://github.com/tansrv/tanserver-connectors/tree/main/swift)
 
-3. [Javascript](https://github.com/tansrv/tanserver-connectors/tree/main/javascript)
+- [Javascript](https://github.com/tansrv/tanserver-connectors/tree/main/javascript)
 
 ## API example
 
