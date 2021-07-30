@@ -35,9 +35,7 @@ After completing the computation and eventually querying the database, Tanserver
 You need a connector to connect your client app to tanserver, currently `Java`, `Javascript` and `Swift` clients are supported. (`Dart` / `C++` will be supported soon.)
 
 - [Java](https://github.com/tansrv/tanserver-connectors/tree/main/java)
-
 - [Swift](https://github.com/tansrv/tanserver-connectors/tree/main/swift)
-
 - [Javascript](https://github.com/tansrv/tanserver-connectors/tree/main/javascript)
 
 ## API example
