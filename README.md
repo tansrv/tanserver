@@ -22,7 +22,7 @@ Tanserver receives requests as JSON string from the client using a custom protoc
 JSON string is composed by an header that contains API name and a body that contains parameters passed to API.
 After completing the computation and eventually querying the database, Tanserver sends a response to the client as JSON data.
 
-# ![Tanserver Scheme](bitmap.png)
+# ![Tanserver Scheme](scheme.png)
 
 ## Features
 
