@@ -35,9 +35,9 @@ core.pg_query.restype           = c_char_p
 core.json_append_status.restype = c_char_p
 
 def pg_query(hostaddr, query, *args):
-  """Query database and get the first field of the first row.
+  """Do a database query and get the first field of the first row.
 
-  ``hostaddr``: Database server IP address (/etc/tanserver.conf)
+  ``hostaddr``: Database server IP address (edit in /etc/tanserver.conf)
 
   ``query``: SQL statement, use $1, $2, $3... to replace variable arguments
 
@@ -45,9 +45,8 @@ def pg_query(hostaddr, query, *args):
 
   ``return``: The first field of the first row or an empty string.
 
-  ``exception``: When the query fails, an exception will be thrown
-  and the reason will be automatically written to the log
-  (/var/log/tanserver/error.log).
+  ``exception``: When an error occurs, the cause will be automatically
+  written in the log file (/var/log/tanserver/error.log).
 
   """
   args_encoded = ()
@@ -64,7 +63,7 @@ def pg_query(hostaddr, query, *args):
   return res.decode()
 
 def json_append_status(json_string, status_code, message):
-  """Append status code and message to a JSON string.
+  """Appends status code and message to a JSON string.
 
   ``json_string``: The JSON string to be processed
 
@@ -72,7 +71,7 @@ def json_append_status(json_string, status_code, message):
 
   ``message``: The specified message
 
-  ``return``: For example: {"status":200,"message":"OK","result":{$json_string}}
+  ``return``: For example: {"status":200,"message":"OK","result":$json_string}
 
   """
   return (core.json_append_status(json_string.encode(), (str(status_code)).encode(), message.encode())).decode()

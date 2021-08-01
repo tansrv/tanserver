@@ -17,13 +17,13 @@ extern "C" {
 
 
 /**
- * Append status code and message to a JSON string.
+ * Appends status code and message to a JSON string.
  *
  * @param json_string: The JSON string to be processed
  * @param stat:        The specified status code
  * @param msg:         The specified message
  *
- * @return For example: {"status":200,"message":"OK","result":{$json_string}}
+ * @return For example: {"status":200,"message":"OK","result":$json_string}
  */
 TAN_PUBLIC_API const char *json_append_status(const char *json_string,
                                               const char *stat,

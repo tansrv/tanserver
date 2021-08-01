@@ -20,9 +20,9 @@ int tan_pgconn_init();
 void tan_pgconn_free();
 
 /**
- * Query database and get the first field of the first row.
+ * Do a database query and get the first field of the first row.
  *
- * @param hostaddr: Database server IP address (/etc/tanserver.conf)
+ * @param hostaddr: Database server IP address (edit in /etc/tanserver.conf)
  * @param query:    SQL statement, use $1, $2, $3... to replace variable arguments
  * @param ...:      Variable arguments, only supports C-style strings
  *
